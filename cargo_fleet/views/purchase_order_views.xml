@@ -1,0 +1,630 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- ========================================================= -->
+    <!-- MASQUER DEMANDE DE PRIX                                  -->
+    <!-- ========================================================= -->
+
+    <record id="purchase.menu_purchase_rfq" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- FORMULAIRE ACHAT / DEPENSE / LEASING                      -->
+    <!-- ========================================================= -->
+
+    <record id="purchase_order_form_inherit_vehicle_full" model="ir.ui.view">
+        <field name="name">purchase.order.form.inherit.vehicle.full</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="priority" eval="90"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='order_line']/list/field[@name='analytic_distribution']" position="attributes">
+                <attribute name="column_invisible">parent.vehicle_purchase_type in ('contract', 'leasing_contract', 'expense')</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='order_line']/list/field[@name='product_qty']" position="attributes">
+                <attribute name="column_invisible">parent.vehicle_purchase_type in ('contract', 'leasing_contract', 'expense')</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='order_line']/list/field[@name='qty_received']" position="attributes">
+                <attribute name="column_invisible">parent.vehicle_purchase_type in ('contract', 'leasing_contract', 'expense')</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='order_line']/list/field[@name='qty_invoiced']" position="attributes">
+                <attribute name="column_invisible">parent.vehicle_purchase_type in ('contract', 'leasing_contract', 'expense')</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='order_line']/list/field[@name='product_uom_id']" position="attributes">
+                <attribute name="column_invisible">parent.vehicle_purchase_type in ('contract', 'leasing_contract', 'expense')</attribute>
+            </xpath>
+
+            <xpath expr="//page[@name='purchase_delivery_invoice']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//div[@name='reminder']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='currency_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='date_order']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='date_planned']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='order_line']" position="attributes">
+                <attribute name="readonly">vehicle_purchase_type == 'expense' and fleet_purchase_service_code in ('assurance','vignette','visite_technique')</attribute>
+            </xpath>
+
+
+            <xpath expr="//field[@name='partner_id']" position="after">
+
+                <field name="vehicle_purchase_type" readonly="1" invisible="1"/>
+                <field name="fleet_purchase_service_code" readonly="1" invisible="1"/>
+                <field name="fleet_service_code" readonly="1" invisible="1"/>
+                <field name="fleet_document_id" readonly="1" invisible="1"/>
+                <field name="rental_card_type" invisible="1"/>
+                <field name="rental_card_id" invisible="1"/>
+                <field name="observation"
+                        invisible="vehicle_purchase_type == 'expense' and fleet_purchase_service_code"
+                        readonly="vehicle_purchase_type == 'expense' and fleet_purchase_service_code"/>
+                <field name="vehicle_expense_amount" readonly="1" invisible="1"/>
+                <field name="vehicle_expense_tax" readonly="1" invisible="1"/>
+                <field name="vehicle_expense_ttc" readonly="1" invisible="1"/>
+                <field name="payment_journal_id" invisible="1"/>
+                <field name="service_document_year" invisible="1"/>
+                <field name="is_leasing_bill_order" invisible="1"/>
+                <field name="leasing_workflow_state" invisible="1"/>
+
+            </xpath>
+
+            <xpath expr="//div[@class='oe_title']/span[1]" position="attributes">
+                <attribute name="invisible">vehicle_purchase_type == 'leasing_contract' and not is_leasing_bill_order or state not in ('draft', 'sent')</attribute>
+            </xpath>
+
+            <xpath expr="//div[@class='oe_title']/span[2]" position="attributes">
+                <attribute name="invisible">vehicle_purchase_type == 'leasing_contract' and not is_leasing_bill_order or state in ('draft', 'sent')</attribute>
+            </xpath>
+
+            <xpath expr="//div[@class='oe_title']" position="inside">
+                <span class="o_form_label" invisible="vehicle_purchase_type != 'leasing_contract' or is_leasing_bill_order">
+                    Contrat leasing
+                </span>
+            </xpath>
+
+            <xpath expr="//header/field[@name='state']" position="replace">
+
+                <!-- Statut Odoo normal -->
+                <field name="state"
+                    widget="statusbar"
+                    invisible="vehicle_purchase_type == 'leasing_contract' and not is_leasing_bill_order"/>
+
+                <!-- Workflow technique -->
+                <field name="leasing_workflow_state"
+                    widget="statusbar"
+                    statusbar_visible="draft,confirmed,approved,cancel"
+                    invisible="vehicle_purchase_type != 'leasing_contract' or is_leasing_bill_order"/>
+
+                <!-- 🔥 TON STATUT CONTRAT -->
+                <field name="leasing_contract_status"
+                    widget="statusbar"
+                    statusbar_visible="a_confirmer,a_approuver,en_cours,fini"
+                    invisible="vehicle_purchase_type != 'leasing_contract' or is_leasing_bill_order"/>
+            </xpath>
+
+            <xpath expr="//header/button[@name='button_cancel']" position="replace">
+                <button name="button_cancel"
+                        type="object"
+                        string="Annuler"
+                        invisible="vehicle_purchase_type == 'leasing_contract' and not is_leasing_bill_order"/>
+            </xpath>
+
+            <xpath expr="//header/button[@name='button_draft']" position="replace">
+                <button name="button_draft"
+                        type="object"
+                        string="Marquer comme brouillon"
+                        invisible="vehicle_purchase_type == 'leasing_contract' and not is_leasing_bill_order"/>
+            </xpath>
+
+            <xpath expr="//header/button[@name='action_rfq_send'][2]" position="replace">
+                <button name="action_rfq_send"
+                        type="object"
+                        string="Relancer par e-mail"
+                        invisible="vehicle_purchase_type == 'leasing_contract' and not is_leasing_bill_order"/>
+            </xpath>
+
+            <xpath expr="//header/button[@name='action_rfq_send'][3]" position="replace">
+                <button name="action_rfq_send"
+                        type="object"
+                        string="Envoyer par e-mail"
+                        invisible="vehicle_purchase_type == 'leasing_contract' and not is_leasing_bill_order"/>
+            </xpath>
+
+            <!-- <xpath expr="//button[@name='action_view_picking']" position="replace">
+                <button name="action_view_picking"
+                        type="object"
+                        string="Réception"
+                        invisible="incoming_picking_count == 0 or (vehicle_purchase_type == 'leasing_contract' and not is_leasing_bill_order)"/>
+            </xpath> -->
+
+            <!-- <xpath expr="//div[@name='button_box']//button[@name='action_view_picking']" position="replace">
+                <button name="action_view_picking"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-truck"
+                        invisible="incoming_picking_count == 0 or (vehicle_purchase_type == 'leasing_contract' and not is_leasing_bill_order)">
+                    <field name="incoming_picking_count" widget="statinfo" string="Réceptions"/>
+                </button>
+            </xpath> -->
+
+            <xpath expr="//header/button[@name='action_acknowledge']" position="replace">
+                <button name="action_acknowledge"
+                        type="object"
+                        string="Accuser réception"
+                        invisible="vehicle_purchase_type == 'leasing_contract' and not is_leasing_bill_order"/>
+            </xpath>
+
+            <xpath expr="//header/widget[@name='purchase_file_uploader']" position="replace">
+                <widget name="purchase_file_uploader"
+                        invisible="vehicle_purchase_type == 'leasing_contract' and not is_leasing_bill_order"/>
+            </xpath>
+
+            <xpath expr="//div[@name='button_box']//button[@name='action_bill_matching']" position="attributes">
+                <attribute name="invisible">vehicle_purchase_type == 'leasing_contract' and not is_leasing_bill_order</attribute>
+            </xpath>
+
+            <xpath expr="//div[@name='button_box']//button[@name='action_purchase_comparison']" position="attributes">
+                <attribute name="invisible">vehicle_purchase_type == 'leasing_contract' and not is_leasing_bill_order</attribute>
+            </xpath>
+
+            <!-- <xpath expr="//button[@name='action_view_picking']" position="attributes">
+                <attribute name="invisible">vehicle_purchase_type == 'leasing_contract' and not is_leasing_bill_order</attribute>
+            </xpath> -->
+
+            <xpath expr="//header" position="inside">
+                <button name="action_confirm_leasing_contract"
+                        type="object"
+                        string="Confirmer contrat"
+                        class="btn-primary"
+                        invisible="vehicle_purchase_type != 'leasing_contract' or is_leasing_bill_order or leasing_workflow_state != 'draft'"/>
+
+                <button name="action_approve_leasing_contract"
+                        type="object"
+                        string="Approuver contrat"
+                        class="btn-primary"
+                        invisible="vehicle_purchase_type != 'leasing_contract' or is_leasing_bill_order or leasing_workflow_state != 'confirmed'"/>
+
+                <button name="button_cancel"
+                        type="object"
+                        string="Annuler"
+                        invisible="vehicle_purchase_type != 'leasing_contract' or is_leasing_bill_order or leasing_workflow_state not in ('draft','confirmed')"/>
+
+                <button name="button_draft"
+                        type="object"
+                        string="Remettre en brouillon"
+                        invisible="vehicle_purchase_type != 'leasing_contract' or is_leasing_bill_order or leasing_workflow_state == 'draft'"/>
+            </xpath>
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_open_bill_or_purchase"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-file-text-o"
+                        invisible="vehicle_purchase_type != 'contract'">
+                    <field name="vendor_bill_count" widget="statinfo" string="Facture / Bon"/>
+                </button>
+            </xpath>
+
+            <xpath expr="//sheet//group[1]" position="after">
+                <group string="Informations"
+                       invisible="vehicle_purchase_type not in ('contract', 'leasing_contract', 'expense')">
+                    <group>
+                        <field name="vehicle_purchase_type" readonly="1"/>
+                        <field name="fleet_purchase_service_code"
+                               readonly="1"
+                               invisible="vehicle_purchase_type != 'expense'"/>
+                        <field name="service_document_year"
+                               invisible="vehicle_purchase_type != 'expense' or fleet_purchase_service_code not in ('assurance','vignette','visite_technique')"/>
+                    </group>
+                </group>
+            </xpath>
+
+            <xpath expr="//field[@name='order_line']/list/field[@name='product_id']" position="attributes">
+                <attribute name="context">
+                    {
+                        'fleet_filter_purchase_products': True,
+                        'fleet_vehicle_purchase_type': parent.vehicle_purchase_type,
+                        'fleet_purchase_service_code': parent.fleet_purchase_service_code,
+                        'fleet_vehicle_id': parent.vehicle_id
+                    }
+                </attribute>
+                <attribute name="domain">[('purchase_ok', '=', True)]</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='order_line']/form//field[@name='product_id']" position="attributes">
+                <attribute name="context">
+                    {
+                        'fleet_filter_purchase_products': True,
+                        'fleet_vehicle_purchase_type': parent.vehicle_purchase_type,
+                        'fleet_purchase_service_code': parent.fleet_purchase_service_code,
+                        'fleet_vehicle_id': parent.vehicle_id
+                    }
+                </attribute>
+                <attribute name="domain">[('purchase_ok', '=', True)]</attribute>
+            </xpath>
+
+            <xpath expr="//sheet/notebook" position="inside">
+                <page string="Contrat d'achat"
+                    invisible="vehicle_purchase_type != 'contract'">
+
+                    <group string="Informations générales" col="2">
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="vehicle_id"/>
+                        </group>
+                        <group>
+                            <field name="amount_total"/>
+                        </group>
+                    </group>
+
+                    <group string="Informations bancaires" col="2">
+                        <group>
+                            <field name="payment_journal_id"/>
+                            <field name="contract_bank_id"/>
+                        </group>
+                        <group>
+                            <field name="contract_bank_account_id"
+                                domain="[('partner_id', '=', partner_id), ('bank_id', '=', contract_bank_id)]"/>
+                        </group>
+                    </group>
+
+                </page>
+
+                <page string="Véhicules assurance"
+                      invisible="vehicle_purchase_type != 'expense' or fleet_purchase_service_code != 'assurance'">
+                    <field name="assurance_vehicle_line_ids"
+                           context="{'default_purchase_order_id': id, 'default_service_code': 'assurance'}">
+                        <list editable="bottom">
+                            <field name="vehicle_id"/>
+                            <field name="document_id"
+                                   string="Document à payer"
+                                   domain="[('vehicle_id', '=', vehicle_id), ('document_type', '=', 'assurance'), ('state', '=', 'not_paid'), ('document_year', '=', parent.service_document_year)]"/>
+                            <field name="amount" string="Montant HT" required="1"/>
+                            <field name="tax_amount" string="Taxe" required="1"/>
+                            <field name="amount_ttc" string="Montant TTC" readonly="1"/>
+                        </list>
+                        <form>
+                            <group>
+                                <field name="vehicle_id"/>
+                                <field name="document_id"
+                                       domain="[('vehicle_id', '=', vehicle_id), ('document_type', '=', 'assurance'), ('state', '=', 'not_paid'), ('document_year', '=', parent.service_document_year)]"/>
+                                <field name="amount" required="1"/>
+                                <field name="tax_amount" required="1"/>
+                                <field name="amount_ttc" readonly="1"/>
+                            </group>
+                        </form>
+                    </field>
+                </page>
+                    <page string="Carte"
+                        invisible="vehicle_purchase_type != 'expense' or fleet_purchase_service_code not in ('jawaz', 'carburant')">
+
+                        <field name="rental_card_type" invisible="1"/>
+
+                        <group string="Rechargement de la carte" col="2">
+                            <group>
+                                <field name="rental_card_id"
+                                    string="Carte à alimenter"
+                                    required="vehicle_purchase_type == 'expense' and fleet_purchase_service_code in ('jawaz', 'carburant')"
+                                    domain="[('active', '=', True), ('card_type', '=', rental_card_type)]"
+                                    options="{'no_create': True}"/>
+                            </group>
+
+                            <group>
+                                <field name="card_amount_ht" string="Montant HT"/>
+                                <field name="card_tax_ids" widget="many2many_tags" string="TVA"/>
+                                <field name="card_tax_amount" readonly="1" string="Montant TVA"/>
+                                <field name="card_amount_ttc" readonly="1" string="Montant TTC"/>
+                            </group>
+                        </group>
+
+                    </page>
+                
+                <xpath expr="//field[@name='order_line']" position="attributes">
+                    <attribute name="invisible">
+                        vehicle_purchase_type == 'expense'
+                        and fleet_purchase_service_code in ('jawaz', 'carburant')
+                    </attribute>
+                </xpath>
+                <page string="Carte verte"
+                        invisible="vehicle_purchase_type != 'expense' or fleet_purchase_service_code != 'carte_verte'">
+
+                        <field name="rental_card_type" invisible="1"/>
+
+                        <group string="Carte verte" col="2">
+                            <group>
+                                <field name="rental_card_id"
+                                    string="Carte verte"
+                                    required="vehicle_purchase_type == 'expense' and fleet_purchase_service_code == 'carte_verte'"
+                                    domain="[('active', '=', True), ('card_type', '=', 'green_card')]"
+                                    options="{'no_create': True}"/>
+                            </group>
+                        </group>
+
+                        <field name="carte_verte_vehicle_line_ids"
+                            context="{'default_purchase_order_id': id, 'default_service_code': 'carte_verte'}">
+                            <list editable="bottom">
+                                <field name="vehicle_id" required="1"/>
+                                <field name="document_id"
+                                    domain="[('vehicle_id', '=', vehicle_id), ('document_type', '=', 'carte_verte'), ('state', '=', 'not_paid')]"/>
+                                <field name="amount" string="Montant HT" required="1"/>
+                                <field name="tax_amount" string="Taxe" required="1"/>
+                                <field name="amount_ttc" string="Montant TTC" readonly="1"/>
+                            </list>
+
+                            <form>
+                                <group>
+                                    <field name="vehicle_id" required="1"/>
+                                    <field name="document_id"
+                                        domain="[('vehicle_id', '=', vehicle_id), ('document_type', '=', 'carte_verte'), ('state', '=', 'not_paid')]"/>
+                                    <field name="amount" string="Montant HT" required="1"/>
+                                    <field name="tax_amount" string="Taxe" required="1"/>
+                                    <field name="amount_ttc" string="Montant TTC" readonly="1"/>
+                                </group>
+                            </form>
+                        </field>
+
+                    </page>
+
+                <page string="Véhicules immatriculation"
+                      invisible="vehicle_purchase_type != 'expense' or fleet_purchase_service_code != 'immatriculation'">
+                    <field name="immatriculation_vehicle_line_ids"
+                           context="{'default_purchase_order_id': id, 'default_service_code': 'immatriculation'}">
+                        <list editable="bottom">
+                            <field name="vehicle_id"/>
+                            <field name="amount" string="Montant HT"/>
+                            <field name="tax_amount" string="Taxe" readonly="1"/>
+                            <field name="amount_ttc" string="Montant TTC" readonly="1"/>
+                        </list>
+                        <form>
+                            <group>
+                                <field name="vehicle_id"/>
+                                <field name="document_id"
+                                       domain="[('vehicle_id', '=', vehicle_id), ('document_type', '=', 'immatriculation'), ('state', '=', 'not_paid')]"/>
+                                <field name="amount" string="Montant HT"/>
+                                <field name="tax_amount" string="Taxe" readonly="1"/>
+                                <field name="amount_ttc" string="Montant TTC" readonly="1"/>
+                            </group>
+                        </form>
+                    </field>
+                </page>
+                <page string="Permis de circulation"
+                    invisible="vehicle_purchase_type != 'expense' or fleet_purchase_service_code != 'permis_circulation'">
+                    <field name="permis_circulation_vehicle_line_ids"
+                        context="{'default_purchase_order_id': id, 'default_service_code': 'permis_circulation'}">
+                        <list editable="bottom">
+                            <field name="vehicle_id"/>
+                            <field name="document_id"
+                                    domain="[
+                                            ('vehicle_id', '=', vehicle_id),
+                                            ('document_type', '=', 'carte_grise'),
+                                            ('state', '=', 'not_paid'),
+                                            ('document_year', '=', purchase_document_year)
+                                        ]"/>
+                            <field name="amount"/>
+                            <field name="tax_amount" readonly="1"/>
+                            <field name="amount_ttc" readonly="1"/>
+                            <field name="note"/>
+                        </list>
+                    </field>
+                </page>
+
+                <page string="Carte grise"
+                    invisible="vehicle_purchase_type != 'expense' or fleet_purchase_service_code != 'carte_grise'">
+                    <field name="carte_grise_vehicle_line_ids"
+                        context="{'default_purchase_order_id': id, 'default_service_code': 'carte_grise'}">
+                        <list editable="bottom">
+                            <field name="vehicle_id"/>
+                            <field name="document_id"
+                                    domain="[
+                                            ('vehicle_id', '=', vehicle_id),
+                                            ('document_type', '=', 'permis_circulation'),
+                                            ('state', '=', 'not_paid'),
+                                            ('document_year', '=', purchase_document_year)
+                                        ]"/>
+                            <field name="amount"/>
+                            <field name="tax_amount" readonly="1"/>
+                            <field name="amount_ttc" readonly="1"/>
+                            <field name="note"/>
+                        </list>
+                    </field>
+                </page>
+                <page string="Pénalités"
+                      invisible="vehicle_purchase_type != 'expense' or fleet_purchase_service_code != 'penalite'">
+                    <group col="2">
+                        <group>
+                            <field name="penalite_reference"/>
+                            <field name="penalite_reason"/>
+                            <field name="penalite_amount" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="penalite_date"/>
+                            <field name="penalite_user_id" readonly="1"/>
+                            <field name="penalite_attachment" filename="penalite_attachment_filename"/>
+                            <field name="penalite_attachment_filename" invisible="1"/>
+                        </group>
+                    </group>
+                </page>
+
+                <page string="Véhicules pénalités"
+                      invisible="vehicle_purchase_type != 'expense' or fleet_purchase_service_code != 'penalite'">
+                    <field name="penalite_vehicle_line_ids"
+                           context="{'default_purchase_order_id': id, 'default_service_code': 'penalite'}">
+                        <list editable="bottom">
+                            <field name="vehicle_id"/>
+                            <field name="amount" string="Montant HT"/>
+                            <field name="tax_amount" string="Taxe" readonly="1"/>
+                            <field name="amount_ttc" string="Montant TTC" readonly="1"/>
+                        </list>
+                        <form>
+                            <group>
+                                <field name="vehicle_id"/>
+                                <field name="document_id"
+                                       domain="[('vehicle_id', '=', vehicle_id), ('document_type', '=', 'penalite'), ('state', '=', 'not_paid')]"/>
+                                <field name="amount" string="Montant HT"/>
+                                <field name="tax_amount" string="Taxe" readonly="1"/>
+                                <field name="amount_ttc" string="Montant TTC" readonly="1"/>
+                            </group>
+                        </form>
+                    </field>
+                </page>
+
+                <page string="Véhicules vignette"
+                      invisible="vehicle_purchase_type != 'expense' or fleet_purchase_service_code != 'vignette'">
+                    <field name="vignette_vehicle_line_ids"
+                           context="{'default_purchase_order_id': id, 'default_service_code': 'vignette'}">
+                        <list editable="bottom">
+                            <field name="vehicle_id"/>
+                            <field name="document_id"
+                                   string="Document à payer"
+                                   domain="[('vehicle_id', '=', vehicle_id), ('document_type', '=', 'vignette'), ('state', '=', 'not_paid'), ('document_year', '=', parent.service_document_year)]"/>
+                            <field name="amount" string="Montant HT" required="1"/>
+                            <field name="tax_amount" string="Taxe" readonly="1"/>
+                            <field name="amount_ttc" string="Montant TTC" readonly="1"/>
+                        </list>
+                        <form>
+                            <group>
+                                <field name="vehicle_id"/>
+                                <field name="document_id"
+                                       domain="[('vehicle_id', '=', vehicle_id), ('document_type', '=', 'vignette'), ('state', '=', 'not_paid'), ('document_year', '=', parent.service_document_year)]"/>
+                                <field name="amount" required="1"/>
+                                <field name="tax_amount" readonly="1"/>
+                                <field name="amount_ttc" readonly="1"/>
+                                <field name="document_count" readonly="1"/>
+                            </group>
+                        </form>
+                    </field>
+                </page>
+
+
+                <page string="Véhicules visite technique"
+                      invisible="vehicle_purchase_type != 'expense' or fleet_purchase_service_code != 'visite_technique'">
+                    <field name="visite_vehicle_line_ids"
+                           context="{'default_purchase_order_id': id, 'default_service_code': 'visite_technique'}">
+                        <list editable="bottom">
+                            <field name="vehicle_id"/>
+                            <field name="document_id"
+                                   string="Document à payer"
+                                   domain="[('vehicle_id', '=', vehicle_id), ('document_type', 'in', ['visite', 'visite_technique']), ('state', '=', 'not_paid'), ('document_year', '=', parent.service_document_year)]"/>
+                            <field name="amount" string="Montant HT"/>
+                            <field name="tax_amount" string="Taxe" readonly="1"/>
+                            <field name="amount_ttc" string="Montant TTC" readonly="1"/>
+                            <field name="document_count" string="Docs no." readonly="1"/>
+                        </list>
+                        <form>
+                            <group>
+                                <field name="vehicle_id"/>
+                                <field name="document_id"
+                                       domain="[('vehicle_id', '=', vehicle_id), ('document_type', 'in', ['visite', 'visite_technique']), ('state', '=', 'not_paid'), ('document_year', '=', parent.service_document_year)]"/>
+                                <field name="amount"/>
+                                <field name="tax_amount" readonly="1"/>
+                                <field name="amount_ttc" readonly="1"/>
+                                <field name="document_count" readonly="1"/>
+                            </group>
+                        </form>
+                    </field>
+                </page>
+
+            </xpath>
+
+        </field>
+    </record>
+    <!-- ========================================================= -->
+    <!-- LISTE CONTRATS D'ACHAT                                   -->
+    <!-- ========================================================= -->
+
+    <record id="view_purchase_order_contract_tree_custom" model="ir.ui.view">
+    <field name="name">purchase.order.contract.tree.custom</field>
+    <field name="model">purchase.order</field>
+    <field name="arch" type="xml">
+        <list string="Contrats d'achat" create="0" edit="0" delete="0">
+            <field name="name" string="Référence contrat"/>
+            <field name="license_plate" string="Immatriculation"/>
+            <field name="numero_w" string="Numéro W"/>
+            <field name="model_name" string="Modèle"/>
+            <field name="brand_name" string="Marque"/>
+            <field name="dealer_id" string="Concessionnaire"/>
+            <field name="partner_id" string="Fournisseur"/>
+            <field name="date_order" string="Date contrat"/>
+            <field name="invoice_status" string="Statut facture"/>
+            <field name="paid_vendor_bill_ref" string="Référence facture"/>
+            <field name="paid_vendor_bill_number" string="Numéro facture"/>
+            <field name="amount_untaxed" string="Montant HT"/>
+            <field name="amount_tax" string="TVA"/>
+            <field name="amount_total" string="Montant TTC"/>
+        </list>
+    </field>
+</record>
+
+
+    <!-- ========================================================= -->
+    <!-- ACTIONS CONTRATS                                          -->
+    <!-- ========================================================= -->
+
+    <record id="action_vehicle_leasing_contracts" model="ir.actions.act_window">
+        <field name="name">Contrats leasing</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="domain">[
+            ('vehicle_purchase_type', '=', 'leasing_contract'),
+            ('is_leasing_bill_order', '=', False),
+            ('source_leasing_contract_id', '=', False),
+            ('source_leasing_echeance_id', '=', False)
+        ]</field>
+        <field name="context">{'default_vehicle_purchase_type': 'leasing_contract'}</field>
+    </record>
+
+<record id="action_vehicle_purchase_contracts" model="ir.actions.act_window">
+        <field name="name">Contrats d'achat</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('vehicle_purchase_type', '=', 'contract')]</field>
+        <field name="context">{'default_vehicle_purchase_type': 'contract', 'create': False}</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_purchase_order_contract_tree_custom')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('purchase.purchase_order_form')})
+        ]"/>
+    </record>
+
+
+    <menuitem id="menu_vehicle_purchase_contracts"
+              name="Contrats d'achat"
+              parent="menu_fleet_leasing_root"
+              action="action_vehicle_purchase_contracts"
+              sequence="21"/>
+
+    <!-- ========================================================= -->
+    <!-- RECHERCHE / GROUPEMENT CONTRAT                            -->
+    <!-- ========================================================= -->
+
+    <record id="purchase_order_search_inherit_contrat_v2" model="ir.ui.view">
+        <field name="name">purchase.order.search.inherit.contrat.v2</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <separator/>
+                <filter name="group_by_origin_contrat"
+                        string="Contrat"
+                        context="{'group_by': 'origin'}"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

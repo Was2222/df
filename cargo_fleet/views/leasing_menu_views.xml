@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- ========================================================= -->
+    <!-- MENU PARENT LEASING                                       -->
+    <!-- ========================================================= -->
+
+    <menuitem id="menu_fleet_leasing_root"
+              name="Contrats achats et leasing"
+              parent="fleet.menu_root"
+              sequence="20"/>
+
+    <menuitem id="menu_fleet_leasing_subroot"
+              name="Leasing"
+              parent="menu_fleet_leasing_root"
+              sequence="1"/>
+
+    <!-- ========================================================= -->
+    <!-- CONTRATS LEASING                                          -->
+    <!-- ========================================================= -->
+
+    <record id="action_vehicle_leasing_contracts" model="ir.actions.act_window">
+        <field name="name">Contrats leasing</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[
+            ('vehicle_purchase_type', '=', 'leasing_contract'),
+            ('is_leasing_bill_order', '=', False)
+        ]</field>
+    </record>
+
+    <menuitem id="menu_leasing_contracts"
+              name="Contrats leasing"
+              parent="menu_fleet_leasing_subroot"
+              action="action_vehicle_leasing_contracts"
+              sequence="1"/>
+
+    <!-- ========================================================= -->
+    <!-- ECHEANCIER                                                -->
+    <!-- ========================================================= -->
+
+    <record id="action_leasing_echeancier" model="ir.actions.act_window">
+        <field name="name">Echéancier leasing</field>
+        <field name="res_model">leasing.echeance</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_leasing_echeancier"
+              name="Echéancier"
+              parent="menu_fleet_leasing_subroot"
+              action="action_leasing_echeancier"
+              sequence="2"/>
+
+    <!-- ========================================================= -->
+    <!-- VUES LEASING A PAYER                                      -->
+    <!-- ========================================================= -->
+
+    <record id="view_leasing_echeance_search_month_custom" model="ir.ui.view">
+        <field name="name">leasing.echeance.search.month.custom</field>
+        <field name="model">leasing.echeance</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="purchase_order_id"/>
+                <field name="vehicle_id"/>
+                <field name="date_echeance"/>
+
+                <filter name="filter_unpaid"
+                        string="Non payé"
+                        domain="[('state','in',['draft','partial','late'])]"/>
+
+                <filter name="group_vehicle"
+                        string="Par véhicule"
+                        context="{'group_by':'vehicle_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_leasing_echeance_tree_month_custom" model="ir.ui.view">
+        <field name="name">leasing.echeance.tree.month.custom</field>
+        <field name="model">leasing.echeance</field>
+        <field name="arch" type="xml">
+            <list string="Leasing à payer">
+                <field name="purchase_order_id"/>
+                <field name="vehicle_id"/>
+                <field name="sequence"/>
+                <field name="date_echeance"/>
+                <field name="date_prelevement_reel"/>
+                <field name="amount_total"/>
+                <field name="amount_paid"/>
+                <field name="amount_due"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_leasing_echeance_form" model="ir.ui.view">
+        <field name="name">leasing.echeance.form</field>
+        <field name="model">leasing.echeance</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="purchase_order_id"/>
+                        <field name="vehicle_id"/>
+                        <field name="sequence"/>
+                        <field name="date_echeance"/>
+                        <field name="date_prelevement_reel"/>
+                        <field name="amount_total"/>
+                        <field name="amount_paid"/>
+                        <field name="amount_due"/>
+                        <field name="state"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- LEASING A PAYER                                           -->
+    <!-- ========================================================= -->
+
+    <record id="action_leasing_current_month" model="ir.actions.act_window">
+        <field name="name">Leasing à payer</field>
+        <field name="res_model">leasing.echeance</field>
+        <field name="view_mode">list,form</field>
+
+        <field name="domain">[
+            ('state','in',['draft','partial','late'])
+        ]</field>
+
+        <field name="search_view_id" ref="view_leasing_echeance_search_month_custom"/>
+
+        <field name="view_ids" eval="[
+            (5,0,0),
+            (0,0,{'view_mode':'list','view_id':ref('view_leasing_echeance_tree_month_custom')}),
+            (0,0,{'view_mode':'form','view_id':ref('view_leasing_echeance_form')})
+        ]"/>
+    </record>
+
+    <menuitem id="menu_leasing_current_month"
+              name="Leasing à payer"
+              parent="menu_fleet_leasing_subroot"
+              action="action_leasing_current_month"
+              sequence="3"/>
+
+    <!-- ========================================================= -->
+    <!-- PAIEMENTS                                                 -->
+    <!-- ========================================================= -->
+
+    <record id="action_leasing_payments" model="ir.actions.act_window">
+        <field name="name">Paiements leasing</field>
+        <field name="res_model">leasing.payment</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_leasing_payments"
+              name="Paiements"
+              parent="menu_fleet_leasing_subroot"
+              action="action_leasing_payments"
+              sequence="4"/>
+
+</odoo>

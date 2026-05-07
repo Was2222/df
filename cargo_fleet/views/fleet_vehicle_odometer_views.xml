@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_fleet_vehicle_odometer_custom_list" model="ir.ui.view">
+        <field name="name">fleet.vehicle.odometer.custom.list</field>
+        <field name="model">fleet.vehicle.odometer.custom</field>
+        <field name="arch" type="xml">
+            <list string="Kilométrage véhicules">
+                <field name="vehicle_id"/>
+                <field name="immatriculation"/>
+                <field name="marque_nom"/>
+                <field name="modele_nom"/>
+                <field name="categorie_nom"/>
+                <field name="date"/>
+                <field name="kilometrage"/>
+                <field name="user_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_fleet_vehicle_odometer_custom_form" model="ir.ui.view">
+        <field name="name">fleet.vehicle.odometer.custom.form</field>
+        <field name="model">fleet.vehicle.odometer.custom</field>
+        <field name="arch" type="xml">
+            <form string="Kilométrage véhicule">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="vehicle_id"/>
+                            <field name="immatriculation" readonly="1"/>
+                            <field name="marque_nom" readonly="1"/>
+                            <field name="modele_nom" readonly="1"/>
+                            <field name="categorie_nom" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                            <field name="kilometrage"/>
+                            <field name="user_id" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_fleet_vehicle_odometer_custom_search" model="ir.ui.view">
+        <field name="name">fleet.vehicle.odometer.custom.search</field>
+        <field name="model">fleet.vehicle.odometer.custom</field>
+        <field name="arch" type="xml">
+            <search string="Recherche kilométrage">
+                <field name="vehicle_id"/>
+                <field name="immatriculation"/>
+                <field name="marque_nom"/>
+                <field name="modele_nom"/>
+                <field name="categorie_nom"/>
+                <field name="date"/>
+                <field name="user_id"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_fleet_vehicle_odometer_custom" model="ir.actions.act_window">
+        <field name="name">Kilométrage</field>
+        <field name="res_model">fleet.vehicle.odometer.custom</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_fleet_vehicle_odometer_custom_search"/>
+    </record>
+
+    
+
+    <!-- Masquer le menu standard kilométrage -->
+    <record id="fleet.menu_fleet_odometer_reporting_odometer" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
+
+</odoo>

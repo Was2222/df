@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo noupdate="1">
+
+    <record id="service_maintenance" model="fleet.service.type">
+        <field name="name">Maintenance</field>
+        <field name="category">service</field>
+        <field name="service_code">maintenance</field>
+    </record>
+
+    <record id="service_vignette" model="fleet.service.type">
+        <field name="name">Vignette</field>
+        <field name="category">service</field>
+        <field name="service_code">vignette</field>
+    </record>
+
+    <record id="service_visite" model="fleet.service.type">
+        <field name="name">Visite technique</field>
+        <field name="category">service</field>
+        <field name="service_code">visite_technique</field>
+    </record>
+
+    <record id="service_assurance" model="fleet.service.type">
+        <field name="name">Assurance</field>
+        <field name="category">service</field>
+        <field name="service_code">assurance</field>
+    </record>
+        <record id="fleet_service_type_jawaz" model="fleet.service.type">
+        <field name="name">Jawaz</field>
+        <field name="category">service</field>
+        <field name="service_code">jawaz</field>
+    </record>
+
+    <record id="fleet_service_type_carburant" model="fleet.service.type">
+        <field name="name">Carburant</field>
+        <field name="category">service</field>
+        <field name="service_code">carburant</field>
+    </record>
+
+    <record id="fleet_service_type_carte_verte" model="fleet.service.type">
+        <field name="name">Carte verte</field>
+        <field name="category">service</field>
+        <field name="service_code">carte_verte</field>
+    </record>
+    <record id="fleet_service_type_immatriculation" model="fleet.service.type">
+    <field name="name">Frais immatriculation</field>
+    <field name="category">service</field>
+    <field name="service_code">immatriculation</field>
+    </record>
+
+</odoo>

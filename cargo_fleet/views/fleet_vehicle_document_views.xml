@@ -1,0 +1,545 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_fleet_vehicle_document_tree" model="ir.ui.view">
+        <field name="name">fleet.vehicle.document.tree</field>
+        <field name="model">fleet.vehicle.document</field>
+        <field name="arch" type="xml">
+            <list string="Documents administratifs" create="0" editable="bottom">
+                <field name="name"/>
+                <field name="license_plate" string="Immatriculation"/>
+                <field name="numero_w" string="Numéro W"/>
+                <field name="type_acquisition" string="Type d'acquisition"/>
+                <field name="model_name" string="Modèle"/>
+                <field name="brand_name" string="Marque"/>
+                <field name="category_id" string="Catégorie"/>
+                <field name="vin_sn" string="N° de châssis"/>
+                <field name="document_type"/>
+                <field name="supplier_id"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="amount" string="Montant TTC" readonly="1"/>
+
+                <field name="state"
+                       widget="badge"
+                       decoration-success="state == 'paid'"
+                       decoration-danger="state == 'not_paid'"
+                       decoration-warning="state == 'billed'"
+                       decoration-info="state == 'purchase_created'"
+                       decoration-primary="state == 'avoirise'"
+                       decoration-muted="state == 'expired'"/>
+
+                <button name="action_create_purchase_order"
+                        type="object"
+                        string="Créer BC"
+                        class="btn-primary"
+                        invisible="purchase_order_id or document_type not in ('carte_grise', 'permis_circulation', 'assurance', 'vignette', 'visite', 'immatriculation', 'jawaz', 'carburant', 'carte_verte')"/>
+
+                <button name="action_view_purchase_order"
+                        type="object"
+                        string="Voir BC"
+                        invisible="not purchase_order_id"/>
+
+                <button name="action_view_source_purchase_order"
+                        type="object"
+                        string="Voir contrat source"
+                        invisible="not source_purchase_order_id"/>
+
+                <button name="action_view_vendor_bill"
+                        type="object"
+                        string="Voir facture"
+                        invisible="not bill_id"/>
+
+            </list>
+        </field>
+    </record>
+
+    <record id="view_fleet_vehicle_document_form" model="ir.ui.view">
+        <field name="name">fleet.vehicle.document.form</field>
+        <field name="model">fleet.vehicle.document</field>
+        <field name="arch" type="xml">
+            <form string="Document administratif">
+                <header>
+
+                    <button name="action_create_purchase_order"
+                            type="object"
+                            string="Créer BC"
+                            class="btn-primary"
+                            invisible="purchase_order_id or document_type not in ('carte_grise', 'permis_circulation', 'assurance', 'vignette', 'visite', 'immatriculation', 'jawaz', 'carburant', 'carte_verte')"/>
+
+                    <button name="action_view_purchase_order"
+                            type="object"
+                            string="Voir BC"
+                            invisible="not purchase_order_id"/>
+
+                    <button name="action_view_source_purchase_order"
+                            type="object"
+                            string="Voir contrat source"
+                            invisible="not source_purchase_order_id"/>
+
+                    <button name="action_view_vendor_bill"
+                            type="object"
+                            string="Voir facture fournisseur"
+                            invisible="not bill_id"/>
+
+                    <field name="state"
+                           widget="statusbar"
+                           invisible="not has_status"
+                           statusbar_visible="not_paid,purchase_created,billed,paid,avoirise,expired"/>
+                </header>
+
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="license_plate" string="Immatriculation"/>
+                            <field name="numero_w" string="Numéro W" readonly="1"/>
+                            <field name="type_acquisition" string="Type d'acquisition" readonly="1"/>
+                            <field name="model_name" string="Modèle" readonly="1"/>
+                            <field name="brand_name" string="Marque" readonly="1"/>
+                            <field name="category_id" string="Catégorie" readonly="1"/>
+                            <field name="vin_sn" string="N° de châssis" readonly="1"/>
+                            <field name="document_type"/>
+                            <field name="supplier_id"/>
+                        </group>
+                        <group string="Informations assurance"
+                            invisible="document_type != 'assurance'">
+                            <group>
+                                <field name="assurance_attestation_number"/>
+                                <field name="assurance_policy_number"/>
+                            </group>
+                        </group>
+
+                        <group string="Informations vignette"
+                            invisible="document_type != 'vignette'">
+                            <group>
+                                <field name="vignette_number"/>
+                            </group>
+                        </group>
+
+                        <group string="Informations visite technique"
+                            invisible="document_type != 'visite'">
+                            <group>
+                                <field name="visite_number"/>
+                                <field name="visite_type"/>
+                                <field name="visite_center"/>
+                            </group>
+                        </group>
+                        <group>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                            <field name="amount" string="Montant TTC" readonly="1"/>
+                            <field name="insurance_type" invisible="document_type != 'assurance'"/>
+                            <field name="source_purchase_order_id" readonly="1"/>
+                            <field name="purchase_order_id" readonly="1"/>
+                            <field name="bill_id" readonly="1"/>
+                            <field name="invoice_number" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Commentaire">
+                            <field name="notes"/>
+                        </page>
+
+                        <page string="Pièce jointe">
+                            <group>
+                                <field name="attachment" filename="attachment_filename"/>
+                                <field name="attachment_filename" invisible="1"/>
+                            </group>
+                        </page>
+
+                        <page string="Détails mensuels"
+                              invisible="document_type not in ('assurance', 'vignette', 'visite')">
+                            <field name="monthly_detail_ids" readonly="1">
+                                <list string="Détails mensuels">
+                                    <field name="month_date"/>
+                                    <field name="label"/>
+                                    <field name="amount"/>
+                                </list>
+                            </field>
+
+                            <group class="oe_subtotal_footer oe_right">
+                                <field name="monthly_total" readonly="1"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_fleet_vehicle_document_search" model="ir.ui.view">
+        <field name="name">fleet.vehicle.document.search</field>
+        <field name="model">fleet.vehicle.document</field>
+        <field name="arch" type="xml">
+            <search string="Documents administratifs">
+                <field name="name"/>
+                <field name="license_plate" string="Immatriculation"/>
+                <field name="numero_w" string="Numéro W"/>
+                <field name="type_acquisition" string="Type d'acquisition"/>
+                <field name="model_name" string="Modèle"/>
+                <field name="brand_name" string="Marque"/>
+                <field name="category_id" string="Catégorie"/>
+                <field name="vin_sn" string="N° de châssis"/>
+                <field name="document_type"/>
+                <field name="supplier_id"/>
+                <field name="state"/>
+                <field name="document_year"/>
+
+                <separator/>
+
+                <filter name="filter_not_paid"
+                        string="Non payés"
+                        domain="[('state', '=', 'not_paid')]"/>
+
+                <filter name="filter_to_pay"
+                        string="À payer"
+                        domain="[('state', '=', 'not_paid')]"/>
+
+                <filter name="filter_current_year"
+                        string="Année courante"
+                        domain="[('document_year', '=', context_today().year)]"/>
+
+                <filter name="group_by_document_type"
+                        string="Type"
+                        context="{'group_by': 'document_type'}"/>
+
+                <filter name="group_by_immat"
+                        string="Immatriculation"
+                        context="{'group_by': 'license_plate'}"/>
+
+                <filter name="group_by_numero_w"
+                        string="Numéro W"
+                        context="{'group_by': 'numero_w'}"/>
+
+                <filter name="group_by_supplier"
+                        string="Fournisseur"
+                        context="{'group_by': 'supplier_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_fleet_vehicle_document_search_custom_all" model="ir.ui.view">
+        <field name="name">fleet.vehicle.document.search.custom.all</field>
+        <field name="model">fleet.vehicle.document</field>
+        <field name="arch" type="xml">
+            <search string="Documents administratifs">
+                <field name="name"/>
+                <field name="license_plate" string="Immatriculation"/>
+                <field name="numero_w" string="Numéro W"/>
+                <field name="type_acquisition" string="Type d'acquisition"/>
+                <field name="model_name" string="Modèle"/>
+                <field name="brand_name" string="Marque"/>
+                <field name="category_id" string="Catégorie"/>
+                <field name="vin_sn" string="N° de châssis"/>
+                <field name="document_type"/>
+                <field name="supplier_id"/>
+                <field name="state"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="document_year"/>
+
+                <separator/>
+
+                <filter name="filter_doc_not_paid"
+                        string="Non payés"
+                        domain="[('state', '=', 'not_paid')]"/>
+
+                <filter name="filter_doc_purchase_created"
+                        string="BC créés"
+                        domain="[('state', '=', 'purchase_created')]"/>
+
+                <filter name="filter_doc_billed"
+                        string="Facturés"
+                        domain="[('state', '=', 'billed')]"/>
+
+                <filter name="filter_doc_paid"
+                        string="Payés"
+                        domain="[('state', '=', 'paid')]"/>
+
+                <filter name="filter_doc_to_pay"
+                        string="À payer"
+                        domain="[('state', '=', 'not_paid')]"/>
+
+                <filter name="filter_doc_current_year"
+                        string="Année courante"
+                        domain="[('document_year', '=', context_today().year)]"/>
+
+                <filter name="filter_doc_avoirise"
+                        string="Avoirisés"
+                        domain="[('state', '=', 'avoirise')]"/>
+
+                <separator/>
+
+                <filter name="group_by_document_type"
+                        string="Type"
+                        context="{'group_by': 'document_type'}"/>
+
+                <filter name="group_by_immat"
+                        string="Immatriculation"
+                        context="{'group_by': 'license_plate'}"/>
+
+                <filter name="group_by_numero_w"
+                        string="Numéro W"
+                        context="{'group_by': 'numero_w'}"/>
+
+                <filter name="group_by_supplier"
+                        string="Fournisseur"
+                        context="{'group_by': 'supplier_id'}"/>
+
+                <filter name="group_by_state"
+                        string="Statut"
+                        context="{'group_by': 'state'}"/>
+
+                <filter name="group_by_vehicle_display"
+                        string="Immatriculation / Numéro W"
+                        context="{'group_by': 'vehicle_display'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_fleet_vehicle_document" model="ir.actions.act_window">
+        <field name="name">Documents administratifs</field>
+        <field name="res_model">fleet.vehicle.document</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="view_id" ref="view_fleet_vehicle_document_tree"/>
+        <field name="search_view_id" ref="view_fleet_vehicle_document_search"/>
+        <field name="context">{'search_default_group_by_document_type': 1}</field>
+    </record>
+
+    <record id="action_create_purchase_orders_selected_documents" model="ir.actions.server">
+        <field name="name">Créer BC sélectionnés</field>
+        <field name="model_id" ref="model_fleet_vehicle_document"/>
+        <field name="binding_model_id" ref="model_fleet_vehicle_document"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_create_purchase_orders_multi()</field>
+    </record>
+
+    <record id="view_fleet_vehicle_document_assurance_tree_custom" model="ir.ui.view">
+        <field name="name">fleet.vehicle.document.assurance.tree.custom</field>
+        <field name="model">fleet.vehicle.document</field>
+        <field name="arch" type="xml">
+           <list string="Documents assurance" create="0" editable="bottom">
+                <field name="name"/>
+                <field name="license_plate" string="Immatriculation"/>
+                <field name="numero_w" string="Numéro W"/>
+                <field name="type_acquisition" string="Type d'acquisition"/>
+                <field name="model_name" string="Modèle"/>
+                <field name="brand_name" string="Marque"/>
+                <field name="category_id" string="Catégorie"/>
+                <field name="vin_sn" string="N° de châssis"/>
+                <field name="supplier_id" string="Fournisseur"/>
+                <field name="insurance_type" string="Type assurance"/>
+                <field name="date_start" string="Date début"/>
+                <field name="date_end" string="Date fin"/>
+                <field name="amount" string="Montant TTC" readonly="1"/>
+                <field name="document_year" string="Année"/>
+                <field name="state" string="Statut"/>
+                <field name="purchase_order_id" string="BC"/>
+                <field name="bill_id" string="Facture"/>
+
+                <button name="action_create_purchase_order"
+                        type="object"
+                        string="Créer BC"
+                        class="btn-primary"
+                        invisible="purchase_order_id"/>
+
+                <button name="action_view_purchase_order"
+                        type="object"
+                        string="Voir BC"
+                        invisible="not purchase_order_id"/>
+
+                <button name="action_view_vendor_bill"
+                        type="object"
+                        string="Voir facture"
+                        invisible="not bill_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_fleet_vehicle_document_vignette_tree_custom" model="ir.ui.view">
+        <field name="name">fleet.vehicle.document.vignette.tree.custom</field>
+        <field name="model">fleet.vehicle.document</field>
+        <field name="arch" type="xml">
+            <list string="Documents vignette" create="0" editable="bottom">
+                <field name="name"/>
+                <field name="license_plate" string="Immatriculation"/>
+                <field name="numero_w" string="Numéro W"/>
+                <field name="type_acquisition" string="Type d'acquisition"/>
+                <field name="model_name" string="Modèle"/>
+                <field name="brand_name" string="Marque"/>
+                <field name="category_id" string="Catégorie"/>
+                <field name="vin_sn" string="N° de châssis"/>
+                <field name="supplier_id" string="Fournisseur"/>
+                <field name="date_start" string="Date début"/>
+                <field name="date_end" string="Date fin"/>
+                <field name="amount" string="Montant TTC" readonly="1"/>
+                <field name="document_year" string="Année"/>
+                <field name="state" string="Statut"/>
+                <field name="purchase_order_id" string="BC"/>
+                <field name="bill_id" string="Facture"/>
+
+                <button name="action_create_purchase_order"
+                        type="object"
+                        string="Créer BC"
+                        class="btn-primary"
+                        invisible="purchase_order_id"/>
+
+                <button name="action_view_purchase_order"
+                        type="object"
+                        string="Voir BC"
+                        invisible="not purchase_order_id"/>
+
+                <button name="action_view_vendor_bill"
+                        type="object"
+                        string="Voir facture"
+                        invisible="not bill_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_fleet_vehicle_document_visite_tree_custom" model="ir.ui.view">
+        <field name="name">fleet.vehicle.document.visite.tree.custom</field>
+        <field name="model">fleet.vehicle.document</field>
+        <field name="arch" type="xml">
+            <list string="Documents visite technique" create="0" editable="bottom">
+                <field name="name"/>
+                <field name="license_plate" string="Immatriculation"/>
+                <field name="numero_w" string="Numéro W"/>
+                <field name="type_acquisition" string="Type d'acquisition"/>
+                <field name="model_name" string="Modèle"/>
+                <field name="brand_name" string="Marque"/>
+                <field name="category_id" string="Catégorie"/>
+                <field name="vin_sn" string="N° de châssis"/>
+                <field name="supplier_id" string="Fournisseur"/>
+                <field name="date_start" string="Date début"/>
+                <field name="date_end" string="Date fin"/>
+                <field name="amount" string="Montant TTC" readonly="1"/>
+                <field name="document_year" string="Année"/>
+                <field name="state" string="Statut"/>
+                <field name="purchase_order_id" string="BC"/>
+                <field name="bill_id" string="Facture"/>
+
+                <button name="action_create_purchase_order"
+                        type="object"
+                        string="Créer BC"
+                        class="btn-primary"
+                        invisible="purchase_order_id"/>
+
+                <button name="action_view_purchase_order"
+                        type="object"
+                        string="Voir BC"
+                        invisible="not purchase_order_id"/>
+
+                <button name="action_view_vendor_bill"
+                        type="object"
+                        string="Voir facture"
+                        invisible="not bill_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_fleet_vehicle_document_assurance" model="ir.actions.act_window">
+        <field name="name">Documents assurance</field>
+        <field name="res_model">fleet.vehicle.document</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="view_id" ref="view_fleet_vehicle_document_assurance_tree_custom"/>
+        <field name="search_view_id" ref="view_fleet_vehicle_document_search_custom_all"/>
+        <field name="domain">[('document_type', '=', 'assurance'), ('document_year', '=', context_today().year)]</field>
+        <field name="context">{'search_default_group_by_vehicle_display': 1, 'search_default_filter_doc_current_year': 1}</field>
+    </record>
+
+    <record id="action_fleet_vehicle_document_vignette" model="ir.actions.act_window">
+        <field name="name">Documents vignette</field>
+        <field name="res_model">fleet.vehicle.document</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="view_id" ref="view_fleet_vehicle_document_vignette_tree_custom"/>
+        <field name="search_view_id" ref="view_fleet_vehicle_document_search_custom_all"/>
+        <field name="domain">[('document_type', '=', 'vignette'), ('document_year', '=', context_today().year)]</field>
+        <field name="context">{'search_default_group_by_vehicle_display': 1, 'search_default_filter_doc_current_year': 1}</field>
+    </record>
+
+    <record id="action_fleet_vehicle_document_visite" model="ir.actions.act_window">
+        <field name="name">Documents visite technique</field>
+        <field name="res_model">fleet.vehicle.document</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="view_id" ref="view_fleet_vehicle_document_visite_tree_custom"/>
+        <field name="search_view_id" ref="view_fleet_vehicle_document_search_custom_all"/>
+        <field name="domain">[('document_type', '=', 'visite'), ('document_year', '=', context_today().year)]</field>
+        <field name="context">{'search_default_group_by_vehicle_display': 1, 'search_default_filter_doc_current_year': 1}</field>
+    </record>
+
+    <record id="action_fleet_vehicle_document_assurance_to_pay" model="ir.actions.act_window">
+        <field name="name">Assurance à payer</field>
+        <field name="res_model">fleet.vehicle.document</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_fleet_vehicle_document_assurance_tree_custom"/>
+        <field name="search_view_id" ref="view_fleet_vehicle_document_search_custom_all"/>
+        <field name="domain">[('document_type', '=', 'assurance'), ('document_year', '=', context_today().year), ('state', '=', 'not_paid')]</field>
+        <field name="context">{'search_default_group_by_vehicle_display': 1, 'search_default_filter_doc_current_year': 1}</field>
+    </record>
+
+    <record id="action_fleet_vehicle_document_vignette_to_pay" model="ir.actions.act_window">
+        <field name="name">Vignette à payer</field>
+        <field name="res_model">fleet.vehicle.document</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="view_id" ref="view_fleet_vehicle_document_vignette_tree_custom"/>
+        <field name="search_view_id" ref="view_fleet_vehicle_document_search_custom_all"/>
+        <field name="domain">[('document_type', '=', 'vignette'), ('document_year', '=', context_today().year), ('state', '=', 'not_paid')]</field>
+        <field name="context">{'search_default_group_by_vehicle_display': 1, 'search_default_filter_doc_current_year': 1}</field>
+    </record>
+
+    <record id="action_fleet_vehicle_document_visite_to_pay" model="ir.actions.act_window">
+        <field name="name">Visite technique à payer</field>
+        <field name="res_model">fleet.vehicle.document</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="view_id" ref="view_fleet_vehicle_document_visite_tree_custom"/>
+        <field name="search_view_id" ref="view_fleet_vehicle_document_search_custom_all"/>
+        <field name="domain">[('document_type', '=', 'visite'), ('document_year', '=', context_today().year), ('state', '=', 'not_paid')]</field>
+        <field name="context">{'search_default_group_by_vehicle_display': 1, 'search_default_filter_doc_current_year': 1}</field>
+    </record>
+
+    <menuitem id="menu_fleet_vehicle_documents_root_custom"
+              name="Documents véhicule"
+              parent="fleet.menu_root"
+              sequence="75"/>
+
+    <menuitem id="menu_fleet_vehicle_document_assurance"
+              name="Documents assurance"
+              parent="menu_fleet_vehicle_documents_root_custom"
+              action="action_fleet_vehicle_document_assurance"
+              sequence="1"/>
+
+    <menuitem id="menu_fleet_vehicle_document_vignette"
+              name="Documents vignette"
+              parent="menu_fleet_vehicle_documents_root_custom"
+              action="action_fleet_vehicle_document_vignette"
+              sequence="2"/>
+
+    <menuitem id="menu_fleet_vehicle_document_visite"
+              name="Documents visite technique"
+              parent="menu_fleet_vehicle_documents_root_custom"
+              action="action_fleet_vehicle_document_visite"
+              sequence="3"/>
+
+    <menuitem id="menu_fleet_vehicle_document_assurance_to_pay"
+              name="Assurance à payer"
+              parent="menu_fleet_vehicle_documents_root_custom"
+              action="action_fleet_vehicle_document_assurance_to_pay"
+              sequence="11"/>
+
+    <menuitem id="menu_fleet_vehicle_document_vignette_to_pay"
+              name="Vignette à payer"
+              parent="menu_fleet_vehicle_documents_root_custom"
+              action="action_fleet_vehicle_document_vignette_to_pay"
+              sequence="12"/>
+
+    <menuitem id="menu_fleet_vehicle_document_visite_to_pay"
+              name="Visite technique à payer"
+              parent="menu_fleet_vehicle_documents_root_custom"
+              action="action_fleet_vehicle_document_visite_to_pay"
+              sequence="13"/>
+
+</odoo>

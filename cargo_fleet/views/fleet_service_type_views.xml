@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- TREE VIEW -->
+    <record id="fleet_service_type_tree_custom" model="ir.ui.view">
+        <field name="name">fleet.service.type.tree.custom</field>
+        <field name="model">fleet.service.type</field>
+        <field name="arch" type="xml">
+            <list create="0" delete="0">
+                <field name="name"/>
+                <field name="category"/>
+                <field name="service_code"/>
+                <field name="product_tmpl_id"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="fleet_service_type_form_custom" model="ir.ui.view">
+        <field name="name">fleet.service.type.form.custom</field>
+        <field name="model">fleet.service.type</field>
+        <field name="arch" type="xml">
+            <form string="Type de service">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="category"/>
+                        <field name="service_code"/>
+                        <field name="product_tmpl_id" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>

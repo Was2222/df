@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- MENU PRINCIPAL -->
+    <record id="fleet.fleet_vehicles" model="ir.ui.menu">
+        <field name="name">Flotte</field>
+    </record>
+
+    <!-- VEHICULES -->
+    <record id="fleet.fleet_vehicle_menu" model="ir.ui.menu">
+        <field name="name">Véhicules</field>
+    </record>
+
+
+    <!-- Désactiver menu standard contrats leasing -->
+            <record id="fleet.fleet_vehicle_log_contract_menu" model="ir.ui.menu">
+                <field name="active" eval="False"/>
+            </record>
+    <!-- SERVICE (juste renommé, pas recréé) -->
+    <record id="fleet.fleet_vehicle_log_services_menu" model="ir.ui.menu">
+        <field name="name">Service</field>
+    </record>
+
+</odoo>

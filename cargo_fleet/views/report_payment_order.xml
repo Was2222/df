@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <template id="report_payment_order_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+
+                <t t-set="selected_lines" t-value="o.vendor_bill_line_ids.filtered(lambda l: l.selected)"/>
+                <t t-set="pages" t-value="[selected_lines[i:i+10] for i in range(0, len(selected_lines), 10)]"/>
+
+                <t t-if="not pages">
+                    <t t-set="pages" t-value="[selected_lines]"/>
+                </t>
+
+                <t t-foreach="pages" t-as="page_lines">
+                    <t t-call="web.external_layout">
+
+                        <div class="page" style="font-size:13px; position:relative; min-height:950px; padding-bottom:120px;">
+
+                            <div style="text-align:center; margin-bottom:20px;">
+                                <h2 style="margin:0; font-size:22px; font-weight:700;">
+                                    ORDRE DE PAIEMENT N°
+                                    <span t-esc="o.name or ''"/>
+                                </h2>
+                            </div>
+
+                            <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+                                <tr>
+                                    <td style="padding:4px 8px; width:20%;"><strong>Date</strong></td>
+                                    <td style="padding:4px 8px; width:30%;">
+                                        <span t-esc="o.date or ''"/>
+                                    </td>
+                                    <td style="padding:4px 8px; width:20%;"><strong>Mode de paiement</strong></td>
+                                    <td style="padding:4px 8px; width:30%;">
+                                        <span t-esc="o.payment_method_line_id.name or ''"/>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="padding:4px 8px;"><strong>Bénéficiaire</strong></td>
+                                    <td style="padding:4px 8px;">
+                                        <span t-esc="o.partner_id.name or ''"/>
+                                    </td>
+                                    <td style="padding:4px 8px;"><strong>Banque</strong></td>
+                                    <td style="padding:4px 8px;">
+                                        <span t-esc="o.journal_id.name or ''"/>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="padding:4px 8px;"><strong>IF</strong></td>
+                                    <td style="padding:4px 8px;">
+                                        <span t-esc="o.partner_id.vat or ''"/>
+                                    </td>
+                                    <td style="padding:4px 8px;"><strong>Montant à payer</strong></td>
+                                    <td style="padding:4px 8px;">
+                                        <span t-esc="'{:,.2f}'.format(o.amount or 0.0).replace(',', ' ')"/>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <table style="width:100%; border-collapse:collapse; margin-top:10px; border:1px solid black;">
+                                <thead>
+                                    <tr>
+                                        <th style="border:1px solid black; padding:6px; text-align:left;">Facture n°</th>
+                                        <th style="border:1px solid black; padding:6px; text-align:left;">Date</th>
+                                        <th style="border:1px solid black; padding:6px; text-align:left;">Désignation</th>
+                                        <th style="border:1px solid black; padding:6px; text-align:right;">HT</th>
+                                        <th style="border:1px solid black; padding:6px; text-align:right;">TVA</th>
+                                        <th style="border:1px solid black; padding:6px; text-align:right;">TTC</th>
+                                        <th style="border:1px solid black; padding:6px; text-align:right;">Reste avant</th>
+                                        <th style="border:1px solid black; padding:6px; text-align:right;">Montant à payer</th>
+                                        <th style="border:1px solid black; padding:6px; text-align:right;">Reste après</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <t t-set="total_ht" t-value="0.0"/>
+                                    <t t-set="total_tva" t-value="0.0"/>
+                                    <t t-set="total_ttc" t-value="0.0"/>
+                                    <t t-set="total_reste_avant" t-value="0.0"/>
+                                    <t t-set="total_a_payer" t-value="0.0"/>
+                                    <t t-set="total_reste_apres" t-value="0.0"/>
+
+                                    <t t-foreach="page_lines" t-as="line">
+                                        <t t-set="total_ht" t-value="total_ht + (line.amount_untaxed or 0.0)"/>
+                                        <t t-set="total_tva" t-value="total_tva + (line.amount_tax or 0.0)"/>
+                                        <t t-set="total_ttc" t-value="total_ttc + (line.amount_total or 0.0)"/>
+                                        <t t-set="total_reste_avant" t-value="total_reste_avant + abs(line.amount_residual or 0.0)"/>
+                                        <t t-set="total_a_payer" t-value="total_a_payer + (line.amount_to_pay or 0.0)"/>
+                                        <t t-set="total_reste_apres" t-value="total_reste_apres + (line.amount_remaining_after or 0.0)"/>
+
+                                        <tr>
+                                            <td style="border:1px solid black; padding:6px;">
+                                                <span t-esc="line.invoice_name or ''"/>
+                                            </td>
+
+                                            <td style="border:1px solid black; padding:6px;">
+                                                <span t-esc="line.invoice_date or ''"/>
+                                            </td>
+
+                                            <td style="border:1px solid black; padding:6px;">
+                                                <t t-set="obs_list" t-value="line.invoice_id.invoice_line_ids.mapped('purchase_line_id.order_id.observation')"/>
+                                                <span t-esc="obs_list and obs_list[0] or ''"/>
+                                            </td>
+
+                                            <td style="border:1px solid black; padding:6px; text-align:right;">
+                                                <span t-esc="'{:,.2f}'.format(line.amount_untaxed or 0.0).replace(',', ' ')"/>
+                                            </td>
+
+                                            <td style="border:1px solid black; padding:6px; text-align:right;">
+                                                <span t-esc="'{:,.2f}'.format(line.amount_tax or 0.0).replace(',', ' ')"/>
+                                            </td>
+
+                                            <td style="border:1px solid black; padding:6px; text-align:right;">
+                                                <span t-esc="'{:,.2f}'.format(line.amount_total or 0.0).replace(',', ' ')"/>
+                                            </td>
+
+                                            <td style="border:1px solid black; padding:6px; text-align:right;">
+                                                <span t-esc="'{:,.2f}'.format(abs(line.amount_residual or 0.0)).replace(',', ' ')"/>
+                                            </td>
+
+                                            <td style="border:1px solid black; padding:6px; text-align:right;">
+                                                <span t-esc="'{:,.2f}'.format(line.amount_to_pay or 0.0).replace(',', ' ')"/>
+                                            </td>
+
+                                            <td style="border:1px solid black; padding:6px; text-align:right;">
+                                                <span t-esc="'{:,.2f}'.format(line.amount_remaining_after or 0.0).replace(',', ' ')"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+
+                                    <tr>
+                                        <td colspan="3" style="border:1px solid black; padding:6px; text-align:right; font-weight:bold;">
+                                            Total page
+                                        </td>
+                                        <td style="border:1px solid black; padding:6px; text-align:right; font-weight:bold;">
+                                            <span t-esc="'{:,.2f}'.format(total_ht).replace(',', ' ')"/>
+                                        </td>
+                                        <td style="border:1px solid black; padding:6px; text-align:right; font-weight:bold;">
+                                            <span t-esc="'{:,.2f}'.format(total_tva).replace(',', ' ')"/>
+                                        </td>
+                                        <td style="border:1px solid black; padding:6px; text-align:right; font-weight:bold;">
+                                            <span t-esc="'{:,.2f}'.format(total_ttc).replace(',', ' ')"/>
+                                        </td>
+                                        <td style="border:1px solid black; padding:6px; text-align:right; font-weight:bold;">
+                                            <span t-esc="'{:,.2f}'.format(total_reste_avant).replace(',', ' ')"/>
+                                        </td>
+                                        <td style="border:1px solid black; padding:6px; text-align:right; font-weight:bold;">
+                                            <span t-esc="'{:,.2f}'.format(total_a_payer).replace(',', ' ')"/>
+                                        </td>
+                                        <td style="border:1px solid black; padding:6px; text-align:right; font-weight:bold;">
+                                            <span t-esc="'{:,.2f}'.format(total_reste_apres).replace(',', ' ')"/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div style="margin-top:45px; width:100%;">
+                                <table style="width:100%; border-collapse:collapse;">
+                                    <tr>
+                                        <td style="width:25%; text-align:center; vertical-align:top; padding-top:20px;">
+                                            <strong>La Direction</strong>
+                                        </td>
+                                        <td style="width:25%; text-align:center; vertical-align:top; padding-top:20px;">
+                                            <strong>Service Comptabilité</strong>
+                                        </td>
+                                        <td style="width:25%; text-align:center; vertical-align:top; padding-top:20px;">
+                                            <strong>Responsable Financier</strong>
+                                        </td>
+                                        <td style="width:25%; text-align:center; vertical-align:top; padding-top:20px;">
+                                            <strong>Bénéficiaire pour acquis</strong>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <div style="position:absolute; bottom:0; left:0; right:0; text-align:center; font-size:11px; border-top:1px solid #000; padding-top:8px;">
+                                <b>CARGO LOC MAGHREB</b><br/>
+                                LOT 38 VITA ROUTE DE CASA - RABAT<br/>
+                                TEL : 05 37 61 03 38 - FAX : 05 37 61 11 53<br/>
+                                EMAIL : CARGOLOCMAGHREB@GMAIL.COM<br/>
+                                ICE : 000108612000077 - R.C : 110015 - PAT : 25540313 - I.F : 3373710<br/>
+                                BMCE BANK - Agence centre d'affaires RABAT<br/>
+                                RIB : 011 810000001 210 00 21127 47
+                            </div>
+
+                        </div>
+
+                        <p style="page-break-after:always;"></p>
+
+                    </t>
+                </t>
+
+            </t>
+        </t>
+    </template>
+
+</odoo>

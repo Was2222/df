@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- ========================================================= -->
+    <!-- ACTION PENALITES                                          -->
+    <!-- ========================================================= -->
+    <record id="action_vehicle_penalite_orders" model="ir.actions.act_window">
+        <field name="name">Pénalités</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="domain">[
+            ('vehicle_purchase_type', '=', 'expense'),
+            ('fleet_purchase_service_code', '=', 'penalite')
+        ]</field>
+        <field name="context">{
+            'default_vehicle_purchase_type': 'expense',
+            'default_fleet_purchase_service_code': 'penalite'
+        }</field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- MENU PENALITES                                            -->
+    <!-- adapte parent="..." selon ton menu Dépenses existant      -->
+    <!-- ========================================================= -->
+    <menuitem
+        id="menu_vehicle_penalite_orders"
+        name="Pénalités"
+        parent="fleet.fleet_vehicle_log_services_menu"
+        action="action_vehicle_penalite_orders"
+        sequence="90"
+    />
+
+    <!-- ========================================================= -->
+    <!-- LISTE PENALITES                                           -->
+    <!-- ========================================================= -->
+    <record id="view_purchase_order_penalite_tree" model="ir.ui.view">
+        <field name="name">purchase.order.penalite.tree</field>
+        <field name="model">purchase.order</field>
+        <field name="arch" type="xml">
+            <list string="Pénalités" create="1" delete="1">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="penalite_reference"/>
+                <field name="penalite_reason"/>
+                <field name="penalite_date"/>
+                <field name="penalite_vehicle_count"/>
+                <field name="penalite_amount"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- FORMULAIRE PENALITES                                      -->
+    <!-- on hérite du formulaire achat standard                    -->
+    <!-- ========================================================= -->
+    <record id="view_purchase_order_penalite_form_inherit" model="ir.ui.view">
+        <field name="name">purchase.order.penalite.form.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+
+            <!-- verrouille les champs techniques -->
+            <xpath expr="//field[@name='partner_id']" position="before">
+                <field name="vehicle_purchase_type" invisible="1"/>
+                <field name="fleet_purchase_service_code" invisible="1"/>
+                <field name="fleet_document_id" invisible="1"/>
+            </xpath>
+
+            <!-- bloc pénalité dans le sheet -->
+            <xpath expr="//sheet/notebook" position="inside">
+                <page string="Pénalité"
+                      invisible="fleet_purchase_service_code != 'penalite'">
+
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="penalite_reference"/>
+                            <field name="penalite_reason"/>
+                            <field name="penalite_date"/>
+                            <field name="penalite_user_id" readonly="1"/>
+                        </group>
+
+                        <group>
+                            <field name="penalite_amount" readonly="1"/>
+                            <field name="penalite_attachment" filename="penalite_attachment_filename"/>
+                            <field name="penalite_attachment_filename" invisible="1"/>
+                        </group>
+                    </group>
+
+                    <separator string="Véhicules pénalisés"/>
+
+                    <field name="penalite_vehicle_line_ids"
+                           context="{'default_service_code': 'penalite'}"
+                           nolabel="1">
+                        <list editable="bottom">
+                            <field name="vehicle_id"/>
+                            <field name="note"/>
+                            <field name="amount"/>
+                            <field name="service_code" invisible="1"/>
+                        </list>
+                        <form string="Ligne pénalité véhicule">
+                            <group>
+                                <field name="service_code" invisible="1"/>
+                                <field name="vehicle_id"/>
+                                <field name="note"/>
+                                <field name="amount"/>
+                            </group>
+                        </form>
+                    </field>
+
+                </page>
+            </xpath>
+
+            <!-- ligne achat : limite les produits selon service -->
+            <xpath expr="//field[@name='order_line']" position="attributes">
+                <attribute name="context">{'default_display_type': False}</attribute>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- VUE SERVICE VEHICLE TREE                                  -->
+    <!-- ========================================================= -->
+    <record id="view_purchase_order_service_vehicle_tree" model="ir.ui.view">
+        <field name="name">purchase.order.service.vehicle.tree</field>
+        <field name="model">purchase.order.service.vehicle</field>
+        <field name="arch" type="xml">
+            <list string="Véhicules service flotte" editable="bottom">
+                <field name="purchase_order_id"/>
+                <field name="service_code"/>
+                <field name="vehicle_id"/>
+                <field name="note"/>
+                <field name="amount"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- VUE SERVICE VEHICLE FORM                                  -->
+    <!-- ========================================================= -->
+    <record id="view_purchase_order_service_vehicle_form" model="ir.ui.view">
+        <field name="name">purchase.order.service.vehicle.form</field>
+        <field name="model">purchase.order.service.vehicle</field>
+        <field name="arch" type="xml">
+            <form string="Véhicule service flotte">
+                <sheet>
+                    <group>
+                        <field name="purchase_order_id"/>
+                        <field name="service_code"/>
+                        <field name="vehicle_id"/>
+                        <field name="note"/>
+                        <field name="amount"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>

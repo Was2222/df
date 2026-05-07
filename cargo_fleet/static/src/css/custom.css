@@ -1,0 +1,7 @@
+.hide-leasing-binary-icons .o_select_file_button,
+.hide-leasing-binary-icons .o_clear_button,
+.hide-leasing-binary-icons .fa-pencil,
+.hide-leasing-binary-icons .fa-trash,
+.hide-leasing-binary-icons .btn-link {
+    display: none !important;
+}

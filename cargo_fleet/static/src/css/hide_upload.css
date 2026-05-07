@@ -1,0 +1,4 @@
+button.o_button_upload_bill,
+button[name="action_upload_bill"] {
+    display: none !important;
+}

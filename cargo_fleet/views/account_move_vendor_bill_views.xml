@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- Liste factures fournisseur -->
+    <record id="account_move_vendor_bill_tree_inherit_contrat_lie" model="ir.ui.view">
+        <field name="name">account.move.vendor.bill.tree.inherit.contrat.lie</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_in_invoice_tree"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='invoice_origin']" position="after">
+                <field name="linked_contract" string="Contrat lié" optional="show"/>
+            </xpath>
+
+            <xpath expr="//field[@name='invoice_date']" position="after">
+                <field name="amount_total" string="Montant total" optional="show"/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- Recherche + group by -->
+    <record id="account_move_vendor_bill_search_inherit_contrat_lie" model="ir.ui.view">
+        <field name="name">account.move.vendor.bill.search.inherit.contrat.lie</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <field name="linked_contract" string="Contrat lié"/>
+                <filter name="group_by_linked_contract"
+                        string="Contrat lié"
+                        context="{'group_by': 'linked_contract'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Verrouiller la liste -->
+    <record id="account_move_tree_full_lock" model="ir.ui.view">
+        <field name="name">account.move.tree.full.lock</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_in_invoice_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="attributes">
+                <attribute name="create">0</attribute>
+                <attribute name="import">0</attribute>
+                <attribute name="delete">0</attribute>
+            </xpath>
+        </field>
+    </record>
+    <!-- Verrouiller formulaire -->
+    <record id="account_move_form_full_lock" model="ir.ui.view">
+        <field name="name">account.move.form.full.lock</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="attributes">
+                <attribute name="create">0</attribute>
+                <attribute name="delete">0</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Supprimer bouton brouillon -->
+    <record id="account_move_form_remove_reset_button" model="ir.ui.view">
+        <field name="name">account.move.form.remove.reset.button</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='button_draft']" position="replace"/>
+        </field>
+    </record>
+
+    <!-- Masquer payment_reference -->
+    <record id="view_move_form_inherit_hide_fields" model="ir.ui.view">
+        <field name="name">account.move.form.hide.fields</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='payment_reference']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Bloc haut -->
+    <record id="view_move_form_inherit_refund_amounts_top" model="ir.ui.view">
+        <field name="name">account.move.form.inherit.refund.amounts.top</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_date']" position="after">
+                <field name="has_vendor_refund" invisible="1"/>
+                <field name="refund_has_impact" invisible="1"/>
+
+                <field name="amount_total"
+                       string="Montant total"
+                       readonly="1"
+                       invisible="move_type != 'in_invoice'"/>
+
+                <field name="refund_move_id"
+                       string="Avoir"
+                       readonly="1"
+                       options="{'no_create': True, 'no_open': False}"
+                       invisible="move_type != 'in_invoice' or not has_vendor_refund"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Masquer quantité -->
+    <record id="view_move_form_inherit_hide_quantity_vendor_bill" model="ir.ui.view">
+        <field name="name">account.move.form.hide.quantity.vendor.bill</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_line_ids']/list//field[@name='quantity']" position="attributes">
+                <attribute name="column_invisible">1</attribute>
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']/form//field[@name='quantity']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Masquer unité -->
+    <record id="view_move_form_inherit_hide_uom_vendor_bill" model="ir.ui.view">
+        <field name="name">account.move.form.hide.uom.vendor.bill</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_line_ids']/list//field[@name='product_uom_id']" position="attributes">
+                <attribute name="column_invisible">1</attribute>
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']/form//field[@name='product_uom_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Montant ligne net -->
+    <record id="view_move_form_inherit_net_line_amount_vendor_bill" model="ir.ui.view">
+        <field name="name">account.move.form.inherit.net.line.amount.vendor.bill</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_line_ids']/list//field[@name='price_subtotal']" position="replace">
+                <field name="display_price_subtotal_net" string="Montant"/>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']/form//field[@name='price_subtotal']" position="replace">
+                <field name="display_price_subtotal_net" string="Montant" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Masquer alerte + bloc Débits en circulation uniquement fournisseur -->
+    <record id="view_move_form_hide_outstanding_vendor_only" model="ir.ui.view">
+        <field name="name">account.move.form.hide.outstanding.vendor.only</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Message bleu fournissessur -->
+            <xpath expr="//div[@role='alert' and contains(@invisible, &quot;move_type not in ('in_invoice', 'in_receipt')&quot;)]" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- Bloc boutons Ajouter -->
+            <xpath expr="//group[field[@name='invoice_outstanding_credits_debits_widget']]" position="attributes">
+                <attribute name="invisible">move_type in ('in_invoice', 'in_refund', 'in_receipt') or state != 'posted' or not invoice_has_outstanding</attribute>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- Garder pivot -->
+    <record id="account.action_move_in_invoice_type" model="ir.actions.act_window">
+        <field name="view_mode">list,pivot,graph,form</field>
+    </record>
+<record id="account_move_form_remove_receipt_selector" model="ir.ui.view">
+    <field name="name">account.move.form.remove.receipt.selector</field>
+    <field name="model">account.move</field>
+    <field name="inherit_id" ref="account.view_move_form"/>
+    <field name="arch" type="xml">
+
+        <!-- Supprimer Facture / Ticket -->
+        <xpath expr="//field[@name='move_type' and @widget='receipt_selector']" position="replace"/>
+
+    </field>
+</record>
+<record id="account_move_form_clean_all" model="ir.ui.view">
+    <field name="name">account.move.form.clean.all</field>
+    <field name="model">account.move</field>
+    <field name="inherit_id" ref="account.view_move_form"/>
+    <field name="arch" type="xml">
+        <xpath expr="//field[@name='purchase_vendor_bill_id']" position="attributes">
+            <attribute name="invisible">1</attribute>
+        </xpath>
+        <!-- Masquer Devise -->
+        <xpath expr="//field[@name='currency_id']" position="attributes">
+            <attribute name="invisible">1</attribute>
+        </xpath>
+
+        <!-- Masquer Date échéance -->
+        <xpath expr="//field[@name='invoice_date_due']" position="attributes">
+            <attribute name="invisible">1</attribute>
+        </xpath>
+
+        <!-- Masquer Conditions paiement -->
+        <xpath expr="//field[@name='invoice_payment_term_id']" position="attributes">
+            <attribute name="invisible">1</attribute>
+        </xpath>
+
+        <!-- Masquer label échéance -->
+        <xpath expr="//label[@for='invoice_date_due']" position="attributes">
+            <attribute name="invisible">1</attribute>
+        </xpath>
+
+    </field>
+</record>
+    <record id="account_move_vendor_bill_search_all_fields" model="ir.ui.view">
+        <field name="name">account.move.vendor.bill.search.all.fields</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+
+                <field name="name"/>
+                <field name="ref"/>
+                <field name="invoice_origin"/>
+                <field name="linked_contract"/>
+                <field name="partner_id"/>
+                <field name="invoice_date"/>
+                <field name="date"/>
+                <field name="invoice_date_due"/>
+                <field name="state"/>
+                <field name="payment_state"/>
+                <field name="move_type"/>
+                <field name="journal_id"/>
+                <field name="company_id"/>
+                <field name="currency_id"/>
+                <field name="amount_untaxed"/>
+                <field name="amount_tax"/>
+                <field name="amount_total"/>
+                <field name="total_vendor_refunds"/>
+                <field name="net_amount_after_refunds"/>
+                <field name="display_amount_total"/>
+                <field name="refund_move_id"/>
+                <field name="refund_numbers"/>
+
+                <separator/>
+
+                <filter name="filter_vendor_bills" string="Factures fournisseur" domain="[('move_type','=','in_invoice')]"/>
+                <filter name="filter_posted" string="Comptabilisé" domain="[('state','=','posted')]"/>
+                <filter name="filter_draft" string="Brouillon" domain="[('state','=','draft')]"/>
+                <filter name="filter_paid" string="Payé" domain="[('payment_state','=','paid')]"/>
+                <filter name="filter_not_paid" string="Non payé" domain="[('payment_state','=','not_paid')]"/>
+                <filter name="filter_partial" string="Partiel" domain="[('payment_state','=','partial')]"/>
+                <filter name="filter_has_refund" string="Avec avoir" domain="[('has_vendor_refund','=',True)]"/>
+
+                <separator/>
+
+                <filter name="group_by_partner" string="Fournisseur" context="{'group_by':'partner_id'}"/>
+                <filter name="group_by_linked_contract_all" string="Contrat lié" context="{'group_by':'linked_contract'}"/>
+                <filter name="group_by_invoice_origin" string="Origine" context="{'group_by':'invoice_origin'}"/>
+                <filter name="group_by_invoice_date" string="Date facture" context="{'group_by':'invoice_date'}"/>
+                <filter name="group_by_due_date" string="Date échéance" context="{'group_by':'invoice_date_due'}"/>
+                <filter name="group_by_state" string="Statut" context="{'group_by':'state'}"/>
+                <filter name="group_by_payment_state" string="Statut paiement" context="{'group_by':'payment_state'}"/>
+                <filter name="group_by_move_type" string="Type pièce" context="{'group_by':'move_type'}"/>
+                <filter name="group_by_journal" string="Journal" context="{'group_by':'journal_id'}"/>
+                <filter name="group_by_company" string="Société" context="{'group_by':'company_id'}"/>
+                <filter name="group_by_currency" string="Devise" context="{'group_by':'currency_id'}"/>
+                <filter name="group_by_refund" string="Avoir" context="{'group_by':'refund_move_id'}"/>
+
+            </xpath>
+        </field>
+    </record>
+</odoo>

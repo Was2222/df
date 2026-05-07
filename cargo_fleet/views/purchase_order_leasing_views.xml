@@ -1,0 +1,959 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- ========================================================= -->
+    <!-- VUES ECHEANCIER / PAIEMENTS                               -->
+    <!-- ========================================================= -->
+
+    <record id="view_leasing_echeance_tree" model="ir.ui.view">
+        <field name="name">leasing.echeance.tree</field>
+        <field name="model">leasing.echeance</field>
+        <field name="arch" type="xml">
+            <list string="Echéancier leasing" create="0" delete="0">
+                <field name="purchase_order_id" string="Contrat leasing"/>
+                <field name="license_plate" string="Immatriculation"/>
+                <field name="numero_w" string="Numéro W"/>
+                <field name="model_name" string="Modèle"/>
+                <field name="brand_name" string="Marque"/>
+                <field name="sequence"/>
+                <field name="date_echeance"/>
+                <field name="date_prelevement_reel"/>
+                <field name="payment_mode"/>
+                <field name="capital_amount"/>
+                <field name="interest_amount"/>
+                <field name="amount_ht"/>
+                <field name="tax_ids" widget="many2many_tags"/>
+                <field name="tva_amount"/>
+                <field name="amount_total"/>
+                <field name="amount_penalite"/>
+                <field name="amount_paid"/>
+                <field name="amount_due"/>
+                <field name="payment_date"/>
+                <field name="state"/>
+                <field name="can_create_bill_order" column_invisible="1"/>
+
+                <button name="action_confirm_and_pay"
+                        type="object"
+                        string="Confirmer et payer"
+                        class="btn-success"
+                        invisible="not can_create_bill_order"/>
+
+                <button name="action_view_bill_purchase_order"
+                        type="object"
+                        string="Voir BL"
+                        invisible="not bill_purchase_order_id"/>
+
+                <button name="action_view_vendor_bill"
+                        type="object"
+                        string="Voir facture"
+                        invisible="not vendor_bill_id"/>
+
+                <button name="action_view_penalty_bill_purchase_order"
+                        type="object"
+                        string="Voir BL pénalité"
+                        invisible="not penalty_bill_purchase_order_id"/>
+
+                <button name="action_view_penalty_vendor_bill"
+                        type="object"
+                        string="Voir facture pénalité"
+                        invisible="not penalty_vendor_bill_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_leasing_echeance_form" model="ir.ui.view">
+        <field name="name">leasing.echeance.form</field>
+        <field name="model">leasing.echeance</field>
+        <field name="arch" type="xml">
+            <form string="Echéance leasing" create="0" delete="0">
+                <header>
+                    <button name="action_confirm_and_pay"
+                            type="object"
+                            string="Confirmer et payer"
+                            class="btn-success"
+                            invisible="not can_create_bill_order"/>
+
+                    <button name="action_view_bill_purchase_order"
+                            type="object"
+                            string="Voir BL"
+                            invisible="not bill_purchase_order_id"/>
+
+                    <button name="action_view_vendor_bill"
+                            type="object"
+                            string="Voir facture"
+                            invisible="not vendor_bill_id"/>
+
+                    <button name="action_view_penalty_bill_purchase_order"
+                            type="object"
+                            string="Voir BL pénalité"
+                            invisible="not penalty_bill_purchase_order_id"/>
+
+                    <button name="action_view_penalty_vendor_bill"
+                            type="object"
+                            string="Voir facture pénalité"
+                            invisible="not penalty_vendor_bill_id"/>
+                </header>
+
+                <sheet>
+                    <group col="2">
+                        <group>
+                            <field name="purchase_order_id" readonly="1"/>
+                            <field name="license_plate" string="Immatriculation" readonly="1"/>
+                            <field name="numero_w" string="Numéro W" readonly="1"/>
+                            <field name="model_name" string="Modèle" readonly="1"/>
+                            <field name="brand_name" string="Marque" readonly="1"/>
+                            <field name="sequence" readonly="1"/>
+                            <field name="name" readonly="1"/>
+                            <field name="date_echeance" readonly="1"/>
+                            <field name="date_prelevement_reel"/>
+                            <field name="payment_mode" readonly="1"/>
+                            <field name="state" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="capital_amount" readonly="1"/>
+                            <field name="interest_amount" readonly="1"/>
+                            <field name="amount_ht" readonly="1"/>
+                            <field name="tax_ids" widget="many2many_tags" readonly="1"/>
+                            <field name="tva_amount" readonly="1"/>
+                            <field name="amount_total" readonly="1"/>
+                            <field name="amount_penalite"/>
+                            <field name="amount_paid" readonly="1"/>
+                            <field name="amount_due" readonly="1"/>
+                            <field name="payment_date" readonly="1"/>
+                            <field name="bill_purchase_order_id" readonly="1"/>
+                            <field name="vendor_bill_id" readonly="1"/>
+                            <field name="penalty_bill_purchase_order_id" readonly="1"/>
+                            <field name="penalty_vendor_bill_id" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <group string="Paiements">
+                        <field name="payment_ids" readonly="1">
+                            <list string="Paiements liés" create="0" edit="0" delete="0">
+                                <field name="payment_date" readonly="1"/>
+                                <field name="amount" readonly="1"/>
+                                <field name="payment_method" readonly="1"/>
+                                <field name="reference" readonly="1"/>
+                            </list>
+                        </field>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_leasing_payment_tree" model="ir.ui.view">
+        <field name="name">leasing.payment.tree</field>
+        <field name="model">leasing.payment</field>
+        <field name="arch" type="xml">
+            <list string="Paiements leasing" create="0" edit="0" delete="0">
+                <field name="purchase_order_id" string="Contrat leasing"/>
+                <field name="license_plate" string="Immatriculation"/>
+                <field name="numero_w" string="Numéro W"/>
+                <field name="model_name" string="Modèle"/>
+                <field name="brand_name" string="Marque"/>
+                <field name="echeance_id"/>
+                <field name="payment_date"/>
+                <field name="amount"/>
+                <field name="payment_method"/>
+                <field name="reference"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_leasing_payment_form" model="ir.ui.view">
+        <field name="name">leasing.payment.form</field>
+        <field name="model">leasing.payment</field>
+        <field name="arch" type="xml">
+            <form string="Paiement leasing" create="0" edit="0" delete="0">
+                <sheet>
+                    <group col="2">
+                        <group>
+                            <field name="echeance_id" readonly="1"/>
+                            <field name="purchase_order_id" readonly="1"/>
+                            <field name="vehicle_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="payment_date" readonly="1"/>
+                            <field name="amount" readonly="1"/>
+                            <field name="payment_method" readonly="1"/>
+                            <field name="reference" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="attachment" filename="attachment_filename" readonly="1"/>
+                        <field name="attachment_filename" invisible="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- ACTION / MENU ECHEANCIER                                  -->
+    <!-- ========================================================= -->
+
+    <record id="action_leasing_echeancier" model="ir.actions.act_window">
+        <field name="name">Echéancier leasing</field>
+        <field name="res_model">leasing.echeance</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="domain">[('state', '=', 'draft')]</field>
+        <field name="context">{'group_by': ['purchase_order_id']}</field>
+    </record>
+
+    <record id="action_leasing_payments" model="ir.actions.act_window">
+        <field name="name">Paiements leasing</field>
+        <field name="res_model">leasing.payment</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+    </record>
+
+    <menuitem id="menu_leasing_echeancier"
+              name="Echéancier leasing"
+              parent="menu_fleet_leasing_subroot"
+              action="action_leasing_echeancier"
+              sequence="22"/>
+
+    <menuitem id="menu_leasing_payments"
+              name="Paiements leasing"
+              parent="menu_fleet_leasing_subroot"
+              action="action_leasing_payments"
+              sequence="23"/>
+
+    <!-- ========================================================= -->
+    <!-- VUE LISTE PERSONNALISEE CONTRATS LEASING                  -->
+    <!-- ========================================================= -->
+
+    <record id="view_purchase_order_leasing_tree_custom" model="ir.ui.view">
+        <field name="name">purchase.order.leasing.tree.custom</field>
+        <field name="model">purchase.order</field>
+        <field name="arch" type="xml">
+            <list string="Contrats leasing" create="0" edit="0" delete="0">
+                <field name="name" string="Référence"/>
+                <field name="license_plate" string="Immatriculation" readonly="1"/>
+                <field name="numero_w" string="Numéro W" readonly="1"/>
+                <field name="model_name" string="Modèle" readonly="1"/>
+                <field name="brand_name" string="Marque" readonly="1"/>
+                <field name="leasing_contract_number" string="N° contrat"/>
+                <field name="leasing_company_id" string="Société de leasing"/>
+                <field name="dealer_id" string="Concessionnaire"/>
+                <field name="leasing_contract_date" string="Date contrat"/>
+                <field name="leasing_first_debit_date" string="1er prélèvement"/>
+                <field name="leasing_contract_end_date" string="Fin contrat"/>
+                <field name="leasing_months" string="Mois"/>
+                <field name="leasing_amount_contract_ttc" string="Montant contrat TTC"/>
+                <field name="leasing_echeance_count" string="Nb échéances"/>
+                <field name="leasing_paid_echeance_count" string="Échéances payées"/>
+                <field name="leasing_remaining_echeance_count" string="Échéances restantes"/>
+                <field name="leasing_contract_status" string="Statut contrat"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_purchase_order_leasing_search_custom" model="ir.ui.view">
+        <field name="name">purchase.order.leasing.search.custom</field>
+        <field name="model">purchase.order</field>
+        <field name="arch" type="xml">
+            <search string="Recherche contrats leasing">
+
+                <!-- Recherche -->
+                <field name="name" string="Référence"/>
+                <field name="license_plate" string="Immatriculation"/>
+                <field name="numero_w" string="Numéro W"/>
+                <field name="model_name" string="Modèle"/>
+                <field name="brand_name" string="Marque"/>
+                <field name="leasing_contract_number" string="N° contrat"/>
+                <field name="leasing_company_id" string="Société de leasing"/>
+                <field name="dealer_id" string="Concessionnaire"/>
+                <field name="leasing_contract_date" string="Date contrat"/>
+                <field name="leasing_first_debit_date" string="1er prélèvement"/>
+                <field name="leasing_contract_end_date" string="Fin contrat"/>
+
+                <separator/>
+
+                <!-- Boutons filtres existence -->
+                <filter name="filter_name" string="Avec référence"
+                    domain="[('name', '!=', False)]"/>
+
+                <filter name="filter_license_plate" string="Avec immatriculation"
+                    domain="[('license_plate', '!=', False)]"/>
+
+                <filter name="filter_numero_w" string="Avec numéro W"
+                    domain="[('numero_w', '!=', False)]"/>
+
+                <filter name="filter_model_name" string="Avec modèle"
+                    domain="[('model_name', '!=', False)]"/>
+
+                <filter name="filter_brand_name" string="Avec marque"
+                    domain="[('brand_name', '!=', False)]"/>
+
+                <filter name="filter_leasing_contract_number" string="Avec n° contrat"
+                    domain="[('leasing_contract_number', '!=', False)]"/>
+
+                <filter name="filter_leasing_company_id" string="Avec société leasing"
+                    domain="[('leasing_company_id', '!=', False)]"/>
+
+                <filter name="filter_dealer_id" string="Avec concessionnaire"
+                    domain="[('dealer_id', '!=', False)]"/>
+
+                <filter name="filter_leasing_contract_date" string="Avec date contrat"
+                    domain="[('leasing_contract_date', '!=', False)]"/>
+
+                <filter name="filter_leasing_first_debit_date" string="Avec 1er prélèvement"
+                    domain="[('leasing_first_debit_date', '!=', False)]"/>
+
+                <filter name="filter_leasing_contract_end_date" string="Avec fin contrat"
+                    domain="[('leasing_contract_end_date', '!=', False)]"/>
+
+                <separator/>
+
+                <!-- Statut contrat -->
+                <filter name="a_confirmer" string="À confirmer"
+                    domain="[('leasing_contract_status', '=', 'a_confirmer')]"/>
+
+                <filter name="a_approuver" string="À approuver"
+                    domain="[('leasing_contract_status', '=', 'a_approuver')]"/>
+
+                <filter name="en_cours" string="En cours"
+                    domain="[('leasing_contract_status', '=', 'en_cours')]"/>
+
+                <filter name="fini" string="Fini"
+                    domain="[('leasing_contract_status', '=', 'fini')]"/>
+
+                <separator/>
+
+                <!-- Group By -->
+                <filter name="group_vehicle" string="Véhicule"
+                    context="{'group_by': 'vehicle_id'}"/>
+
+                <filter name="group_license_plate" string="Immatriculation"
+                    context="{'group_by': 'license_plate'}"/>
+
+                <filter name="group_numero_w" string="Numéro W"
+                    context="{'group_by': 'numero_w'}"/>
+
+                <filter name="group_brand" string="Marque"
+                    context="{'group_by': 'brand_name'}"/>
+
+                <filter name="group_model" string="Modèle"
+                    context="{'group_by': 'model_name'}"/>
+
+                <filter name="group_company" string="Société leasing"
+                    context="{'group_by': 'leasing_company_id'}"/>
+
+                <filter name="group_dealer" string="Concessionnaire"
+                    context="{'group_by': 'dealer_id'}"/>
+
+                <filter name="group_status" string="Statut contrat"
+                    context="{'group_by': 'leasing_contract_status'}"/>
+
+                <filter name="group_contract_date" string="Date contrat"
+                    context="{'group_by': 'leasing_contract_date'}"/>
+
+                <filter name="group_first_debit_date" string="1er prélèvement"
+                    context="{'group_by': 'leasing_first_debit_date'}"/>
+
+                <filter name="group_end_date" string="Fin contrat"
+                    context="{'group_by': 'leasing_contract_end_date'}"/>
+
+            </search>
+        </field>
+    </record>
+    <record id="purchase_order_form_inherit_hide_leasing_fields" model="ir.ui.view">
+    <field name="name">purchase.order.form.hide.leasing.fields</field>
+    <field name="model">purchase.order</field>
+    <field name="inherit_id" ref="purchase.purchase_order_form"/>
+    <field name="arch" type="xml">
+
+        <!-- Masquer Fournisseur -->
+        <xpath expr="//field[@name='partner_id']" position="attributes">
+            <attribute name="invisible">vehicle_purchase_type == 'leasing_contract'</attribute>
+        </xpath>
+
+        <!-- Masquer Référence fournisseur -->
+        <xpath expr="//field[@name='partner_ref']" position="attributes">
+            <attribute name="invisible">vehicle_purchase_type == 'leasing_contract'</attribute>
+        </xpath>
+
+        <!-- Masquer Date confirmation -->
+        <xpath expr="//field[@name='date_approve']" position="attributes">
+            <attribute name="invisible">vehicle_purchase_type == 'leasing_contract'</attribute>
+        </xpath>
+
+    </field>
+</record>
+    <!-- ========================================================= -->
+    <!-- VUE SPECIFIQUE BL ECHEANCE LEASING                        -->
+    <!-- ========================================================= -->
+
+    <record id="view_purchase_order_leasing_bill_form_custom" model="ir.ui.view">
+        <field name="name">purchase.order.leasing.bill.form.custom</field>
+        <field name="model">purchase.order</field>
+        <field name="priority" eval="200"/>
+        <field name="arch" type="xml">
+            <form string="Bon de commande échéance leasing" create="0" delete="0">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,sent,to approve,purchase,done,cancel"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                        <div>
+                            <span>Bon de commande échéance leasing</span>
+                        </div>
+                    </div>
+
+                    <group>
+                        <field name="vehicle_purchase_type" invisible="1"/>
+                        <field name="is_leasing_bill_order" invisible="1"/>
+                    </group>
+
+                    <group string="Informations générales" col="2">
+                        <group>
+                            <field name="partner_id" readonly="1"/>
+                            <field name="vehicle_id" readonly="1"/>
+                            <field name="partner_ref" readonly="1"/>
+                            <field name="date_order" readonly="1"/>
+                            <field name="origin" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="source_leasing_contract_id" readonly="1"/>
+                            <field name="source_leasing_echeance_id" readonly="1"/>
+                            <field name="invoice_status" readonly="1"/>
+                            <field name="amount_untaxed" readonly="1"/>
+                            <field name="amount_tax" readonly="1"/>
+                            <field name="amount_total" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Produits">
+                            <field name="order_line" readonly="1">
+                                <list string="Lignes" create="0" edit="0" delete="0">
+                                    <field name="product_id"/>
+                                    <field name="name"/>
+                                    <field name="product_qty"/>
+                                    <field name="product_uom_id"/>
+                                    <field name="price_unit"/>
+                                    <field name="tax_ids" widget="many2many_tags"/>
+                                    <field name="price_subtotal"/>
+                                    <field name="price_total"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- ACTION CONTRATS LEASING                                   -->
+    <!-- ========================================================= -->
+
+    <record id="action_vehicle_leasing_contracts" model="ir.actions.act_window">
+        <field name="name">Contrats leasing</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="domain">[
+            ('vehicle_purchase_type', '=', 'leasing_contract'),
+            ('is_leasing_bill_order', '=', False),
+            ('source_leasing_contract_id', '=', False),
+            ('source_leasing_echeance_id', '=', False)
+        ]</field>
+        <field name="context">{'default_vehicle_purchase_type': 'leasing_contract'}</field>
+        <field name="search_view_id" ref="view_purchase_order_leasing_search_custom"/>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_purchase_order_leasing_tree_custom')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('purchase.purchase_order_form')})
+        ]"/>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- FORMULAIRE LEASING : ONGLETS ET DETAILS                   -->
+    <!-- ========================================================= -->
+
+    <record id="purchase_order_form_inherit_vehicle_leasing_details" model="ir.ui.view">
+        <field name="name">purchase.order.form.inherit.vehicle.leasing.details</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_leasing_echeances"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-calendar"
+                        invisible="vehicle_purchase_type != 'leasing_contract' or is_leasing_bill_order">
+                    <field name="leasing_echeance_count"
+                           widget="statinfo"
+                           string="Echéances"/>
+                </button>
+
+                <button name="action_view_leasing_payments"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-money"
+                        invisible="vehicle_purchase_type != 'leasing_contract' or is_leasing_bill_order">
+                    <field name="leasing_paid_echeance_count"
+                           widget="statinfo"
+                           string="Payées"/>
+                </button>
+            </xpath>
+
+            <xpath expr="//sheet/notebook" position="inside">
+
+                <page string="Contrat leasing"
+                      invisible="vehicle_purchase_type != 'leasing_contract' or is_leasing_bill_order">
+                    <group string="Informations générales" col="2">
+                        <group>
+                            <field name="leasing_contract_number"/>
+                            <field name="leasing_contract_date"/>
+                            <field name="dealer_id"/>
+                            <field name="leasing_company_id"/>
+                            <field name="leasing_first_debit_date"/>
+                            <field name="leasing_end_debit_date"/>
+                            <field name="leasing_contract_end_date"/>
+                            <field name="leasing_duration"/>
+                            <field name="leasing_months"/>
+                            <field name="leasing_reception_date"/>
+                            <field name="leasing_amendment"/>
+                        </group>
+
+                        <group>
+                            <field name="leasing_deferment_duration"/>
+                            <field name="leasing_date_start"/>
+                            <field name="leasing_date_end"/>
+                            <field name="leasing_amount_contract_ht"/>
+                            <field name="leasing_tax_ids" widget="many2many_tags"/>
+                            <field name="leasing_amount_contract_ttc" readonly="1"/>
+
+                            <field name="leasing_amount_debit_ttc"/>
+                            <field name="leasing_amount_debit_ht" readonly="1"/>
+                            <field name="leasing_debit_tax_amount" readonly="1"/>
+
+                            <field name="leasing_amount_financed_ht"/>
+                            <field name="leasing_amount_financed_ttc" readonly="1"/>
+                            <field name="leasing_residual_value_ht"/>
+                            <field name="leasing_residual_value_ttc" readonly="1"/>
+                        </group>
+                        <group string="Contrat signé">
+                            <field name="leasing_contract_attachment"
+                                filename="leasing_contract_attachment_filename"/>
+                            <field name="leasing_contract_attachment_filename" invisible="1"/>
+                        </group>
+                        <group string="Informations bancaires" col="2">
+                        <group>
+                            <field name="payment_journal_id"/>
+                            <field name="contract_bank_id"/>
+                        </group>
+                        <group>
+                            <field name="contract_bank_account_id"
+                                domain="[('partner_id', '=', partner_id), ('bank_id', '=', contract_bank_id)]"/>
+                        </group>
+                    </group>
+                    </group>
+                </page>
+
+                <page string="Echéancier"
+                    invisible="vehicle_purchase_type != 'leasing_contract' or is_leasing_bill_order">
+
+                    <group col="2" colspan="4">
+
+                        <group string="Résumé financier" col="2">
+                            <group>
+                                <field name="leasing_echeance_count" readonly="1"/>
+                                <field name="leasing_paid_echeance_count" readonly="1"/>
+                                <field name="leasing_remaining_echeance_count" readonly="1"/>
+                                <field name="leasing_late_echeance_count" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="leasing_total_amount" readonly="1"/>
+                                <field name="leasing_total_paid" readonly="1"/>
+                                <field name="leasing_total_remaining" readonly="1"/>
+                            </group>
+                        </group>
+
+                        <group string="Tableau d'amortissement" col="1">
+
+                            <field name="leasing_amortization_attachment"
+                                filename="leasing_amortization_attachment_filename"
+                                    options="{'no_clear': True, 'no_open': True}"/>
+
+                            <group col="2">
+                                <button name="action_generate_leasing_echeancier"
+                                        type="object"
+                                        string="Générer échéancier"
+                                        class="btn-primary"
+                                        invisible="vehicle_purchase_type != 'leasing_contract' or is_leasing_bill_order"/>
+
+                                <button name="action_remove_leasing_amortization_attachment"
+                                        type="object"
+                                        string="Supprimer"
+                                        class="btn-secondary"
+                                        invisible="not leasing_amortization_attachment"/>
+                            </group>
+                        </group>
+
+                    </group>
+
+                    <field name="leasing_echeance_ids" context="{'default_purchase_order_id': id}">
+                        <list string="Echéancier du contrat" create="0" delete="0" editable="bottom" multi_edit="1">
+                            <field name="sequence" readonly="1"/>
+                            <field name="date_echeance" readonly="1"/>
+                            <field name="date_prelevement_reel"/>
+                            <field name="payment_mode" readonly="1"/>
+                            <field name="capital_amount" readonly="1"/>
+                            <field name="interest_amount" readonly="1"/>
+                            <field name="amount_ht" readonly="1"/>
+                            <field name="tax_ids" widget="many2many_tags" readonly="1"/>
+                            <field name="tva_amount" readonly="1"/>
+                            <field name="amount_total" readonly="1"/>
+                            <field name="amount_penalite"/>
+                            <field name="amount_paid" readonly="1"/>
+                            <field name="amount_due" readonly="1"/>
+                            <field name="payment_date" readonly="1"/>
+                            <field name="state" readonly="1"/>
+                            <field name="can_create_bill_order" column_invisible="1"/>
+
+                            <button name="action_confirm_and_pay"
+                                    type="object"
+                                    string="Confirmer et payer"
+                                    class="btn-success"
+                                    invisible="not can_create_bill_order"/>
+
+                            <button name="action_view_bill_purchase_order"
+                                    type="object"
+                                    string="Voir BL"
+                                    invisible="not bill_purchase_order_id"/>
+
+                            <button name="action_view_vendor_bill"
+                                    type="object"
+                                    string="Voir facture"
+                                    invisible="not vendor_bill_id"/>
+
+                            <button name="action_view_penalty_bill_purchase_order"
+                                    type="object"
+                                    string="Voir BL pénalité"
+                                    invisible="not penalty_bill_purchase_order_id"/>
+
+                            <button name="action_view_penalty_vendor_bill"
+                                    type="object"
+                                    string="Voir facture pénalité"
+                                    invisible="not penalty_vendor_bill_id"/>
+                        </list>
+                    </field>
+                </page>
+                <page string="Paiements"
+                      invisible="vehicle_purchase_type != 'leasing_contract' or is_leasing_bill_order">
+                    <field name="leasing_payment_ids" readonly="1">
+                        <list string="Paiements du contrat" create="0" edit="0" delete="0">
+                            <field name="echeance_id" domain="[('purchase_order_id', '=', parent.id)]" readonly="1"/>
+                            <field name="payment_date" readonly="1"/>
+                            <field name="amount" readonly="1"/>
+                            <field name="payment_method" readonly="1"/>
+                            <field name="reference" readonly="1"/>
+                        </list>
+                        <form string="Paiement du contrat" create="0" edit="0" delete="0">
+                            <group col="2">
+                                <group>
+                                    <field name="echeance_id" domain="[('purchase_order_id', '=', parent.id)]" readonly="1"/>
+                                    <field name="payment_date" readonly="1"/>
+                                    <field name="amount" readonly="1"/>
+                                </group>
+                                <group>
+                                    <field name="payment_method" readonly="1"/>
+                                    <field name="reference" readonly="1"/>
+                                </group>
+                            </group>
+
+                            <group>
+                                <field name="attachment" filename="attachment_filename" readonly="1"/>
+                                <field name="attachment_filename" invisible="1"/>
+                            </group>
+                        </form>
+                    </field>
+                </page>
+
+            
+
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- LEASING A PAYER                                           -->
+    <!-- ========================================================= -->
+
+    <record id="view_leasing_echeance_search_month_custom" model="ir.ui.view">
+    <field name="name">leasing.echeance.search.month.custom</field>
+    <field name="model">leasing.echeance</field>
+    <field name="arch" type="xml">
+        <search string="Recherche échéancier leasing">
+
+            <!-- Champs de recherche -->
+            <field name="purchase_order_id" string="Contrat leasing"/>
+            <field name="license_plate" string="Immatriculation"/>
+            <field name="numero_w" string="Numéro W"/>
+            <field name="model_name" string="Modèle"/>
+            <field name="brand_name" string="Marque"/>
+            <field name="sequence" string="Séquence"/>
+            <field name="date_echeance" string="Date échéance"/>
+            <field name="date_prelevement_reel" string="Date prélèvement réel"/>
+            <field name="payment_mode" string="Mode paiement"/>
+            <field name="capital_amount" string="Capital"/>
+            <field name="interest_amount" string="Intérêt"/>
+            <field name="amount_ht" string="Montant HT"/>
+            <field name="tax_ids" string="Taxes"/>
+            <field name="tva_amount" string="Montant TVA"/>
+            <field name="amount_total" string="Montant total"/>
+            <field name="amount_penalite" string="Montant pénalité"/>
+            <field name="amount_paid" string="Montant payé"/>
+            <field name="amount_due" string="Montant restant"/>
+            <field name="payment_date" string="Date paiement"/>
+            <field name="state" string="Statut"/>
+
+            <separator/>
+
+            <!-- Filtres -->
+            <filter name="filter_unpaid"
+                    string="À payer"
+                    domain="[('state', 'in', ['draft', 'partial', 'late'])]"/>
+
+            <filter name="filter_purchase_order"
+                    string="Avec contrat leasing"
+                    domain="[('purchase_order_id', '!=', False)]"/>
+
+            <filter name="filter_license_plate"
+                    string="Avec immatriculation"
+                    domain="[('license_plate', '!=', False)]"/>
+
+            <filter name="filter_numero_w"
+                    string="Avec numéro W"
+                    domain="[('numero_w', '!=', False)]"/>
+
+            <filter name="filter_model"
+                    string="Avec modèle"
+                    domain="[('model_name', '!=', False)]"/>
+
+            <filter name="filter_brand"
+                    string="Avec marque"
+                    domain="[('brand_name', '!=', False)]"/>
+
+            <filter name="filter_sequence"
+                    string="Avec séquence"
+                    domain="[('sequence', '!=', False)]"/>
+
+            <filter name="filter_date_echeance"
+                    string="Avec date échéance"
+                    domain="[('date_echeance', '!=', False)]"/>
+
+            <filter name="filter_date_prelevement_reel"
+                    string="Avec date prélèvement réel"
+                    domain="[('date_prelevement_reel', '!=', False)]"/>
+
+            <filter name="filter_payment_mode"
+                    string="Avec mode paiement"
+                    domain="[('payment_mode', '!=', False)]"/>
+
+            <filter name="filter_capital_amount"
+                    string="Avec capital"
+                    domain="[('capital_amount', '!=', 0)]"/>
+
+            <filter name="filter_interest_amount"
+                    string="Avec intérêt"
+                    domain="[('interest_amount', '!=', 0)]"/>
+
+            <filter name="filter_amount_ht"
+                    string="Avec montant HT"
+                    domain="[('amount_ht', '!=', 0)]"/>
+
+            <filter name="filter_tax_ids"
+                    string="Avec taxes"
+                    domain="[('tax_ids', '!=', False)]"/>
+
+            <filter name="filter_tva_amount"
+                    string="Avec montant TVA"
+                    domain="[('tva_amount', '!=', 0)]"/>
+
+            <filter name="filter_amount_total"
+                    string="Avec montant total"
+                    domain="[('amount_total', '!=', 0)]"/>
+
+            <filter name="filter_amount_penalite"
+                    string="Avec pénalité"
+                    domain="[('amount_penalite', '!=', 0)]"/>
+
+            <filter name="filter_amount_paid"
+                    string="Avec montant payé"
+                    domain="[('amount_paid', '!=', 0)]"/>
+
+            <filter name="filter_amount_due"
+                    string="Avec montant restant"
+                    domain="[('amount_due', '!=', 0)]"/>
+
+            <filter name="filter_payment_date"
+                    string="Avec date paiement"
+                    domain="[('payment_date', '!=', False)]"/>
+
+            <filter name="filter_state"
+                    string="Avec statut"
+                    domain="[('state', '!=', False)]"/>
+
+            <separator/>
+
+            <!-- Group By -->
+            <filter name="group_by_contract"
+                    string="Contrat"
+                    context="{'group_by': 'purchase_order_id'}"/>
+
+            <filter name="group_by_license_plate"
+                    string="Immatriculation"
+                    context="{'group_by': 'license_plate'}"/>
+
+            <filter name="group_by_numero_w"
+                    string="Numéro W"
+                    context="{'group_by': 'numero_w'}"/>
+
+            <filter name="group_by_model"
+                    string="Modèle"
+                    context="{'group_by': 'model_name'}"/>
+
+            <filter name="group_by_brand"
+                    string="Marque"
+                    context="{'group_by': 'brand_name'}"/>
+
+            <filter name="group_by_payment_mode"
+                    string="Mode paiement"
+                    context="{'group_by': 'payment_mode'}"/>
+
+            <filter name="group_by_date_echeance"
+                    string="Date échéance"
+                    context="{'group_by': 'date_echeance'}"/>
+
+            <filter name="group_by_payment_date"
+                    string="Date paiement"
+                    context="{'group_by': 'payment_date'}"/>
+
+            <filter name="group_by_state"
+                    string="Statut"
+                    context="{'group_by': 'state'}"/>
+
+        </search>
+    </field>
+</record>
+
+    <record id="view_leasing_echeance_tree_month_custom" model="ir.ui.view">
+        <field name="name">leasing.echeance.tree.month.custom</field>
+        <field name="model">leasing.echeance</field>
+        <field name="arch" type="xml">
+            <list string="Leasing à payer"
+                  create="0"
+                  delete="0"
+                  editable="bottom"
+                  multi_edit="1">
+
+                <header>
+                    <button name="action_confirm_and_pay_selected"
+                            type="object"
+                            string="Confirmer et payer"
+                            class="btn-success"
+                            display="always"/>
+                </header>
+
+                <field name="purchase_order_id" string="Contrat" readonly="1"/>
+                <field name="license_plate" string="Immatriculation" readonly="1"/>
+                <field name="numero_w" string="Numéro W" readonly="1"/>
+                <field name="model_name" string="Modèle" readonly="1"/>
+                <field name="brand_name" string="Marque" readonly="1"/>
+                <field name="partner_id" string="Société leasing" readonly="1"/>
+                <field name="sequence" string="N° échéance" readonly="1"/>
+                <field name="date_echeance" readonly="1"/>
+                <field name="date_prelevement_reel"/>
+                <field name="amount_total" readonly="1"/>
+                <field name="amount_penalite"/>
+                <field name="amount_paid" readonly="1"/>
+                <field name="amount_due" readonly="1"/>
+                <field name="state" readonly="1"/>
+                <field name="can_create_bill_order" column_invisible="1"/>
+
+                <button name="action_confirm_and_pay"
+                        type="object"
+                        string="Confirmer et payer"
+                        class="btn-success"
+                        invisible="not can_create_bill_order"/>
+
+                <button name="action_view_bill_purchase_order"
+                        type="object"
+                        string="Voir BL"
+                        invisible="not bill_purchase_order_id"/>
+
+                <button name="action_view_vendor_bill"
+                        type="object"
+                        string="Voir facture"
+                        invisible="not vendor_bill_id"/>
+
+                <button name="action_view_penalty_bill_purchase_order"
+                        type="object"
+                        string="Voir BL pénalité"
+                        invisible="not penalty_bill_purchase_order_id"/>
+
+                <button name="action_view_penalty_vendor_bill"
+                        type="object"
+                        string="Voir facture pénalité"
+                        invisible="not penalty_vendor_bill_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_leasing_current_month" model="ir.actions.act_window">
+        <field name="name">Leasing à payer</field>
+        <field name="res_model">leasing.echeance</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="domain">[
+            '&amp;',
+            ('state', 'in', ['draft', 'partial', 'late']),
+            ('date_echeance', '&lt;=', (context_today() + relativedelta(months=1, day=1, days=-1)).strftime('%Y-%m-%d'))
+        ]</field>
+        <field name="search_view_id" ref="view_leasing_echeance_search_month_custom"/>
+        <field name="context">{'search_default_filter_unpaid': 1, 'search_default_group_by_vehicle': 1}</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_leasing_echeance_tree_month_custom')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_leasing_echeance_form')})
+        ]"/>
+    </record>
+
+    <record id="purchase_order_form_hide_buttons_leasing" model="ir.ui.view">
+        <field name="name">purchase.order.form.hide.buttons.leasing</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="priority" eval="999"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//header/button[@id='bid_confirm']" position="attributes">
+                <attribute name="invisible">state != 'sent' or vehicle_purchase_type == 'leasing_contract'</attribute>
+            </xpath>
+
+            <xpath expr="//header/button[@id='draft_confirm']" position="attributes">
+                <attribute name="invisible">state != 'draft' or vehicle_purchase_type == 'leasing_contract'</attribute>
+            </xpath>
+
+            <xpath expr="//header/button[@name='action_rfq_send'][1]" position="attributes">
+                <attribute name="invisible">state != 'draft' or vehicle_purchase_type == 'leasing_contract'</attribute>
+            </xpath>
+
+            <xpath expr="//header/button[@name='action_rfq_send'][2]" position="attributes">
+                <attribute name="invisible">state != 'sent' or vehicle_purchase_type == 'leasing_contract'</attribute>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

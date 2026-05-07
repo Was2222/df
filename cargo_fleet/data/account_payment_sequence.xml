@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="seq_account_payment_pf" model="ir.sequence">
+        <field name="name">Paiement Fournisseur</field>
+        <field name="code">account.payment.pf</field>
+        <field name="prefix">PF</field>
+        <field name="padding">1</field>
+        <field name="number_next">1</field>
+        <field name="number_increment">1</field>
+        <field name="implementation">standard</field>
+    </record>
+</odoo>

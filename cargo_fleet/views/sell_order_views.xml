@@ -1,0 +1,35 @@
+<odoo>
+    <record id="view_sale_order_form_inherit_vehicle" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.vehicle</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="vehicle_id"/>
+            </xpath>
+        </field>
+    </record>
+<record id="view_sale_order_fix_buttons" model="ir.ui.view">
+    <field name="name">sale.order.form.fix.buttons</field>
+    <field name="model">sale.order</field>
+    <field name="inherit_id" ref="sale.view_order_form"/>
+    <field name="arch" type="xml">
+
+        <!-- Réinjecter bouton confirmer propre -->
+        <xpath expr="//header" position="inside">
+
+            <button name="action_confirm"
+                    string="Confirmer"
+                    type="object"
+                    class="btn-primary"
+                    invisible="state not in ('draft','sent')"/>
+            <button name="action_create_vehicle_invoice"
+                                    string="Créer facture véhicule"
+                                    type="object"
+                                    class="btn-primary"
+                                    invisible="not vehicle_id or state not in ('sale','done')"/>
+        </xpath>
+
+    </field>
+</record>
+</odoo>

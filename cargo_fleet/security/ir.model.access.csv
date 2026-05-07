@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_fleet_vehicle_document_user,fleet.vehicle.document.user,model_fleet_vehicle_document,base.group_user,1,1,1,1
+access_fleet_vehicle_document_monthly_detail_user,fleet.vehicle.document.monthly.detail.user,model_fleet_vehicle_document_monthly_detail,base.group_user,1,1,1,1
+access_fleet_vehicle_equipment_type_user,fleet.vehicle.equipment.type.user,model_fleet_vehicle_equipment_type,base.group_user,1,1,1,1
+access_fleet_vehicle_equipment_user,fleet.vehicle.equipment.user,model_fleet_vehicle_equipment,base.group_user,1,1,1,1
+access_fleet_vehicle_odometer_custom_user,fleet.vehicle.odometer.custom.user,model_fleet_vehicle_odometer_custom,base.group_user,1,1,1,1
+access_purchase_order_service_vehicle_user,purchase.order.service.vehicle.user,model_purchase_order_service_vehicle,base.group_user,1,1,1,1
+access_leasing_echeance_user,leasing.echeance.user,model_leasing_echeance,base.group_user,1,1,1,1
+access_leasing_payment_user,leasing.payment.user,model_leasing_payment,base.group_user,1,1,1,1
+access_account_payment_vendor_bill_line_user,access.account.payment.vendor.bill.line.user,model_account_payment_vendor_bill_line,account.group_account_user,1,1,1,1

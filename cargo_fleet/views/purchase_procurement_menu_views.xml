@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- VUES LISTE -->
+
+    <record id="view_purchase_order_assurance_tree_custom" model="ir.ui.view">
+        <field name="name">purchase.order.assurance.tree.custom</field>
+        <field name="model">purchase.order</field>
+        <field name="arch" type="xml">
+            <list string="Achat assurance">
+                <field name="name"/>
+                <field name="vehicle_id"/>
+                <field name="partner_id"/>
+                <field name="partner_ref"/>
+                <field name="assurance_amount"/>
+                <field name="assurance_date_start"/>
+                <field name="assurance_date_end"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_purchase_order_vignette_tree_custom" model="ir.ui.view">
+        <field name="name">purchase.order.vignette.tree.custom</field>
+        <field name="model">purchase.order</field>
+        <field name="arch" type="xml">
+            <list string="Achat vignette">
+                <field name="name"/>
+                <field name="vehicle_id"/>
+                <field name="partner_id"/>
+                <field name="partner_ref"/>
+                <field name="vignette_amount"/>
+                <field name="vignette_date_start"/>
+                <field name="vignette_date_end"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_purchase_order_visite_tree_custom" model="ir.ui.view">
+        <field name="name">purchase.order.visite.tree.custom</field>
+        <field name="model">purchase.order</field>
+        <field name="arch" type="xml">
+            <list string="Achat visite technique">
+                <field name="name"/>
+                <field name="vehicle_id"/>
+                <field name="partner_id"/>
+                <field name="partner_ref"/>
+                <field name="visite_amount"/>
+                <field name="visite_date_start"/>
+                <field name="visite_date_end"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_purchase_order_leasing_payment_tree_custom" model="ir.ui.view">
+        <field name="name">purchase.order.leasing.payment.tree.custom</field>
+        <field name="model">purchase.order</field>
+        <field name="arch" type="xml">
+            <list string="Paiements leasing">
+                <field name="name"/>
+                <field name="vehicle_id"/>
+                <field name="partner_id"/>
+                <field name="partner_ref"/>
+                <field name="source_leasing_contract_id"/>
+                <field name="source_leasing_echeance_id"/>
+                <field name="date_order"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_purchase_order_penalite_tree_custom" model="ir.ui.view">
+        <field name="name">purchase.order.penalite.tree.custom</field>
+        <field name="model">purchase.order</field>
+        <field name="arch" type="xml">
+            <list string="Achat pénalités">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="partner_ref"/>
+                <field name="penalite_amount"/>
+                <field name="penalite_date"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ACTIONS PERSONNALISEES -->
+
+    <record id="action_purchase_vehicle_orders" model="ir.actions.act_window">
+        <field name="name">Achat véhicule</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="domain">[('vehicle_purchase_type', '=', 'contract')]</field>
+        <field name="context">{'default_vehicle_purchase_type': 'contract'}</field>
+    </record>
+
+    <record id="action_purchase_leasing_payment_orders" model="ir.actions.act_window">
+        <field name="name">Paiements leasing</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="domain">[
+            ('vehicle_purchase_type', '=', 'leasing_contract'),
+            ('is_leasing_bill_order', '=', True)
+        ]</field>
+        <field name="view_id" ref="view_purchase_order_leasing_payment_tree_custom"/>
+    </record>
+
+    <record id="action_purchase_assurance_orders" model="ir.actions.act_window">
+        <field name="name">Achat assurance</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="domain">[('vehicle_purchase_type', '=', 'expense'), ('fleet_purchase_service_code', '=', 'assurance')]</field>
+        <field name="context">{'default_vehicle_purchase_type': 'expense', 'default_fleet_purchase_service_code': 'assurance'}</field>
+        <field name="view_id" ref="view_purchase_order_assurance_tree_custom"/>
+    </record>
+
+    <record id="action_purchase_vignette_orders" model="ir.actions.act_window">
+        <field name="name">Achat vignette</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="domain">[('vehicle_purchase_type', '=', 'expense'), ('fleet_purchase_service_code', '=', 'vignette')]</field>
+        <field name="context">{'default_vehicle_purchase_type': 'expense', 'default_fleet_purchase_service_code': 'vignette'}</field>
+        <field name="view_id" ref="view_purchase_order_vignette_tree_custom"/>
+    </record>
+
+    <record id="action_purchase_visite_orders" model="ir.actions.act_window">
+        <field name="name">Achat visite technique</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="domain">[('vehicle_purchase_type', '=', 'expense'), ('fleet_purchase_service_code', '=', 'visite_technique')]</field>
+        <field name="context">{'default_vehicle_purchase_type': 'expense', 'default_fleet_purchase_service_code': 'visite_technique'}</field>
+        <field name="view_id" ref="view_purchase_order_visite_tree_custom"/>
+    </record>
+
+    <record id="action_purchase_maintenance_orders" model="ir.actions.act_window">
+        <field name="name">Achat maintenance</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="domain">[('vehicle_purchase_type', '=', 'expense'), ('fleet_purchase_service_code', '=', 'maintenance')]</field>
+        <field name="context">{'default_vehicle_purchase_type': 'expense', 'default_fleet_purchase_service_code': 'maintenance'}</field>
+    </record>
+
+    <record id="action_purchase_jawaz_orders" model="ir.actions.act_window">
+        <field name="name">Achat Jawaz</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="domain">[('vehicle_purchase_type', '=', 'expense'), ('fleet_purchase_service_code', '=', 'jawaz')]</field>
+        <field name="context">{'default_vehicle_purchase_type': 'expense', 'default_fleet_purchase_service_code': 'jawaz'}</field>
+    </record>
+
+    <record id="action_purchase_carburant_orders" model="ir.actions.act_window">
+        <field name="name">Achat carburant</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="domain">[('vehicle_purchase_type', '=', 'expense'), ('fleet_purchase_service_code', '=', 'carburant')]</field>
+        <field name="context">{'default_vehicle_purchase_type': 'expense', 'default_fleet_purchase_service_code': 'carburant'}</field>
+    </record>
+
+    <record id="action_purchase_carte_verte_orders" model="ir.actions.act_window">
+        <field name="name">Achat carte verte</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="domain">[('vehicle_purchase_type', '=', 'expense'), ('fleet_purchase_service_code', '=', 'carte_verte')]</field>
+        <field name="context">{'default_vehicle_purchase_type': 'expense', 'default_fleet_purchase_service_code': 'carte_verte'}</field>
+    </record>
+
+    <record id="action_purchase_immatriculation_orders" model="ir.actions.act_window">
+        <field name="name">Achat frais immatriculation</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="domain">[('vehicle_purchase_type', '=', 'expense'), ('fleet_purchase_service_code', '=', 'immatriculation')]</field>
+        <field name="context">{'default_vehicle_purchase_type': 'expense', 'default_fleet_purchase_service_code': 'immatriculation'}</field>
+    </record>
+
+    <record id="action_purchase_penalite_orders" model="ir.actions.act_window">
+        <field name="name">Achat pénalités</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="domain">[('vehicle_purchase_type', '=', 'expense'), ('fleet_purchase_service_code', '=', 'penalite')]</field>
+        <field name="context">{'default_vehicle_purchase_type': 'expense', 'default_fleet_purchase_service_code': 'penalite'}</field>
+        <field name="view_id" ref="view_purchase_order_penalite_tree_custom"/>
+    </record>
+
+    <!-- ON TOUCHE SEULEMENT LES MENUS STANDARDS LEASING -->
+    <record id="purchase.purchase_rfq" model="ir.actions.act_window">
+        <field name="domain">[
+            '|',
+            ('vehicle_purchase_type', '!=', 'leasing_contract'),
+            ('is_leasing_bill_order', '=', True),
+            ('state', 'in', ('draft', 'sent', 'to approve'))
+        ]</field>
+    </record>
+
+    <record id="purchase.purchase_form_action" model="ir.actions.act_window">
+        <field name="domain">[
+            '|',
+            ('vehicle_purchase_type', '!=', 'leasing_contract'),
+            ('is_leasing_bill_order', '=', True),
+            ('state', 'in', ('purchase', 'done', 'cancel'))
+        ]</field>
+    </record>
+
+    <!-- MENUS -->
+
+    <menuitem id="menu_purchase_vehicle_orders"
+              name="Achat véhicule"
+              parent="purchase.menu_procurement_management"
+              action="action_purchase_vehicle_orders"
+              sequence="30"/>
+
+    <menuitem id="menu_purchase_leasing_payment_orders"
+              name="Paiements leasing"
+              parent="purchase.menu_procurement_management"
+              action="action_purchase_leasing_payment_orders"
+              sequence="31"/>
+
+    <menuitem id="menu_purchase_vignette_orders"
+              name="Achat vignette"
+              parent="purchase.menu_procurement_management"
+              action="action_purchase_vignette_orders"
+              sequence="32"/>
+
+    <menuitem id="menu_purchase_assurance_orders"
+              name="Achat assurance"
+              parent="purchase.menu_procurement_management"
+              action="action_purchase_assurance_orders"
+              sequence="33"/>
+
+    <menuitem id="menu_purchase_visite_orders"
+              name="Achat visite technique"
+              parent="purchase.menu_procurement_management"
+              action="action_purchase_visite_orders"
+              sequence="34"/>
+
+    <menuitem id="menu_purchase_maintenance_orders"
+              name="Achat maintenance"
+              parent="purchase.menu_procurement_management"
+              action="action_purchase_maintenance_orders"
+              sequence="35"/>
+
+    <menuitem id="menu_purchase_jawaz_orders"
+              name="Achat Jawaz"
+              parent="purchase.menu_procurement_management"
+              action="action_purchase_jawaz_orders"
+              sequence="36"/>
+
+    <menuitem id="menu_purchase_carburant_orders"
+              name="Achat carburant"
+              parent="purchase.menu_procurement_management"
+              action="action_purchase_carburant_orders"
+              sequence="37"/>
+
+    <menuitem id="menu_purchase_carte_verte_orders"
+              name="Achat carte verte"
+              parent="purchase.menu_procurement_management"
+              action="action_purchase_carte_verte_orders"
+              sequence="38"/>
+
+    <menuitem id="menu_purchase_immatriculation_orders"
+              name="Achat frais immatriculation"
+              parent="purchase.menu_procurement_management"
+              action="action_purchase_immatriculation_orders"
+              sequence="39"/>
+
+    <menuitem id="menu_purchase_penalite_orders"
+              name="Achat pénalités"
+              parent="purchase.menu_procurement_management"
+              action="action_purchase_penalite_orders"
+              sequence="40"/>
+    <menuitem id="menu_purchase_permis_circulation_orders"
+            name="Achat permis de circulation"
+            parent="purchase.menu_procurement_management"
+            action="action_purchase_permis_circulation_orders"
+            sequence="35"/>
+
+    <menuitem id="menu_purchase_carte_grise_orders"
+            name="Achat carte grise"
+            parent="purchase.menu_procurement_management"
+            action="action_purchase_carte_grise_orders"
+            sequence="36"/>
+
+</odoo>

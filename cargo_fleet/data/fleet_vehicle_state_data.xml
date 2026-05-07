@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <record id="fleet_vehicle_state_creation" model="fleet.vehicle.state">
+            <field name="name">En création</field>
+            <field name="sequence">1</field>
+        </record>
+
+        <record id="fleet_vehicle_state_acquired" model="fleet.vehicle.state">
+            <field name="name">Acquis</field>
+            <field name="sequence">2</field>
+        </record>
+
+        <record id="fleet_vehicle_state_available" model="fleet.vehicle.state">
+            <field name="name">Disponible</field>
+            <field name="sequence">3</field>
+        </record>
+
+        <record id="fleet_vehicle_state_rental" model="fleet.vehicle.state">
+            <field name="name">En location</field>
+            <field name="sequence">4</field>
+        </record>
+
+        <record id="fleet_vehicle_state_repair" model="fleet.vehicle.state">
+            <field name="name">En réparation</field>
+            <field name="sequence">5</field>
+        </record>
+
+        <record id="fleet_vehicle_state_reservation" model="fleet.vehicle.state">
+            <field name="name">En réservation</field>
+            <field name="sequence">6</field>
+        </record>
+
+        <record id="fleet_vehicle_state_blocked" model="fleet.vehicle.state">
+            <field name="name">Bloqué</field>
+            <field name="sequence">7</field>
+        </record>
+
+        <record id="fleet_vehicle_state_cession" model="fleet.vehicle.state">
+            <field name="name">Cession</field>
+            <field name="sequence">8</field>
+        </record>
+
+    </data>
+</odoo>

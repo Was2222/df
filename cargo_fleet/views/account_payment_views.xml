@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_account_payment_form_inherit_multi_vendor_bills" model="ir.ui.view">
+        <field name="name">account.payment.form.inherit.multi.vendor.bills</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='state']" position="replace">
+                <field name="state" widget="statusbar" statusbar_visible="draft,in_process,partial_used,paid" invisible="partner_type == 'supplier' and payment_type == 'inbound'"/>
+                <field name="state" widget="statusbar" statusbar_visible="draft,in_process,received" invisible="not (partner_type == 'supplier' and payment_type == 'inbound')"/>
+            </xpath>
+                <xpath expr="//group[@name='group1']" position="replace">
+
+    <group name="group1">
+
+        <field name="payment_type"
+               widget="radio"
+               options="{'horizontal': True}"
+               readonly="state != 'draft'"/>
+
+        <field name="partner_id"
+               context="{'default_is_company': True}"
+               string="Client"
+               options="{'no_quick_create': True}"
+               invisible="partner_type != 'customer'"
+               readonly="state != 'draft'"/>
+
+        <field name="partner_id"
+               context="{'default_is_company': True}"
+               string="Fournisseur"
+               options="{'no_quick_create': True}"
+               invisible="partner_type != 'supplier'"
+               readonly="state != 'draft'"/>
+
+        <field name="source_supplier_payment_id"
+               string="Paiement à annuler"
+               invisible="not (partner_type == 'supplier' and payment_type == 'inbound')"
+               readonly="state not in ('draft', 'received')"
+               options="{'no_create': True, 'no_open': False}"/>
+
+        <label for="amount"/>
+
+        <div name="amount_div" class="o_row">
+            <field name="amount"
+                   readonly="state != 'draft'"/>
+
+            <field name="currency_id"
+                   options="{'no_create': True, 'no_open': True}"
+                   required="1"
+                   readonly="state != 'draft'"
+                   groups="base.group_multi_currency"/>
+        </div>
+
+        <field name="date"
+               readonly="state != 'draft'"/>
+
+        <field name="memo"
+               string="Memo"/>
+
+    </group>
+
+</xpath>
+
+            <xpath expr="//header" position="inside">
+                <button name="action_refresh_vendor_bills"
+                        type="object"
+                        string="Actualiser factures"
+                        class="btn-secondary"
+                        invisible="partner_type != 'supplier' or state in ('paid', 'posted', 'received')"/>
+
+                <button name="action_confirm_remaining"
+                        type="object"
+                        string="Confirmer"
+                        class="btn-primary"
+                        invisible="not (partner_type == 'supplier' and payment_type == 'outbound' and state == 'partial_used')"/>
+
+                <button name="action_print_payment_order"
+                        type="object"
+                        string="Imprimer ordre de paiement"
+                        class="btn btn-primary"
+                        invisible="not (partner_type == 'supplier' and payment_type == 'outbound' and state in ('paid', 'partial_used'))"/>
+            </xpath>
+
+            <xpath expr="//sheet" position="inside">
+                <div invisible="not (partner_type == 'supplier' and payment_type in ('outbound', 'inbound'))">
+
+                    <div style="display:flex; align-items:center; gap:30px; flex-wrap:nowrap; overflow-x:auto; margin-bottom:12px;">
+
+                        <h6 style="margin:0; font-weight:600;" invisible="payment_type != 'outbound'">
+                            Pièces fournisseur à payer
+                        </h6>
+
+                        <h6 style="margin:0; font-weight:600;" invisible="payment_type != 'inbound'">
+                            Factures fournisseur payées à remettre
+                        </h6>
+
+                        <span>
+                            <field name="selected_bill_count" readonly="1" nolabel="1"/>
+                            pièce(s)
+                        </span>
+
+                        <span invisible="payment_type != 'outbound'">
+                            Affecté :
+                            <field name="selected_bill_total" widget="monetary" options="{'currency_field': 'currency_id'}" readonly="1"/>
+                        </span>
+
+                        <span invisible="payment_type != 'inbound'">
+                            À remettre :
+                            <field name="selected_bill_total" widget="monetary" options="{'currency_field': 'currency_id'}" readonly="1"/>
+                        </span>
+
+                        <span>
+                            Paiement :
+                            <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}" readonly="1"/>
+                        </span>
+
+                        <span invisible="payment_difference &lt;= 0" style="background:#ffc107; padding:4px 10px; border-radius:6px;">
+                            Non affecté :
+                            <field name="payment_difference" widget="monetary" options="{'currency_field': 'currency_id'}" readonly="1"/>
+                        </span>
+
+                        <span invisible="payment_difference != 0" style="background:#28a745; color:white; padding:4px 12px; border-radius:8px;">
+                            ✓ Entièrement affecté
+                        </span>
+
+                    </div>
+
+                    <field name="vendor_bill_line_ids"
+                           nolabel="1"
+                           readonly="state not in ('draft', 'in_process', 'partial_used', 'received', 'paid')"
+                           options="{'no_open': True}">
+
+                        <list editable="bottom" create="0" delete="0" decoration-muted="is_processed">
+                            <field name="is_processed" column_invisible="1"/>
+                            <field name="is_fully_paid" column_invisible="1"/>
+                            <field name="selected"/>
+                            <field name="move_type" readonly="1"/>
+                            <field name="invoice_name" readonly="1"/>
+                            <field name="invoice_ref" readonly="1"/>
+                            <field name="invoice_date" readonly="1"/>
+                            <field name="invoice_date_due" readonly="1"/>
+                            <field name="amount_untaxed" readonly="1" widget="monetary"/>
+                            <field name="amount_tax" readonly="1" widget="monetary"/>
+                            <field name="amount_total" readonly="1" widget="monetary"/>
+                            <field name="amount_before" readonly="1" widget="monetary"/>
+                            <field name="amount_to_pay" string="Montant à traiter" widget="monetary"/>
+                            <field name="amount_remaining_after" readonly="1" widget="monetary"/>
+
+                            <field name="payment_state"
+                                   string="Statut facture"
+                                   readonly="1"
+                                   widget="badge"
+                                   decoration-danger="payment_state == 'not_paid'"
+                                   decoration-warning="payment_state in ('partial', 'in_payment')"
+                                   decoration-success="payment_state == 'paid'"/>
+
+                            <field name="source_payment_id" string="Paiement annulé" readonly="1"/>
+                            <field name="processed_payment_id" string="Paiement associé" readonly="1"/>
+                            <field name="cancellation_payment_id" string="Paiement d'annulation" readonly="1"/>
+                            <field name="invoice_id" column_invisible="1"/>
+                            <field name="currency_id" column_invisible="1"/>
+
+                            <button name="action_remove_line"
+                                    type="object"
+                                    icon="fa-trash"
+                                    class="btn btn-sm btn-outline-danger"
+                                    invisible="parent.state == 'paid'"/>
+                        </list>
+                    </field>
+
+                </div>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="action_report_payment_order" model="ir.actions.report">
+        <field name="name">Ordre de paiement</field>
+        <field name="model">account.payment</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">cargo_fleet.report_payment_order_template</field>
+        <field name="report_file">cargo_fleet.report_payment_order_template</field>
+        <field name="print_report_name">'Ordre de paiement - %s' % (object.name or '')</field>
+        <field name="binding_model_id" ref="account.model_account_payment"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="view_account_payment_list_inherit_cancel_info" model="ir.ui.view">
+        <field name="name">account.payment.list.inherit.cancel.info</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="source_supplier_payment_id" string="Paiement à annuler" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="account_payment_form_hide_buttons_when_paid" model="ir.ui.view">
+        <field name="name">account.payment.form.hide.buttons.when.paid</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//header//button[@name='action_post']" position="attributes">
+                <attribute name="invisible">state not in ('draft', 'in_process') or (partner_type == 'supplier' and state in ('paid', 'posted', 'received', 'partial_used'))</attribute>
+            </xpath>
+
+            <xpath expr="//header//button[@name='action_draft']" position="attributes">
+                <attribute name="invisible">partner_type == 'supplier' and state in ('paid', 'posted', 'received')</attribute>
+            </xpath>
+
+        </field>
+    </record>
+    <record id="view_account_payment_search_inherit_all_filters" model="ir.ui.view">
+        <field name="name">account.payment.search.inherit.all.filters</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_search"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//search" position="inside">
+
+                <!-- Recherche par champs -->
+                <field name="name"/>
+                <field name="payment_type"/>
+                <field name="partner_type"/>
+                <field name="partner_id"/>
+                <field name="source_supplier_payment_id"/>
+                <field name="amount"/>
+                <field name="currency_id"/>
+                <field name="date"/>
+                <field name="memo"/>
+                <field name="state"/>
+                <field name="selected_bill_count"/>
+                <field name="selected_bill_total"/>
+                <field name="payment_difference"/>
+                <field name="hide_from_vendor_bill_button"/>
+
+                <separator/>
+
+                <!-- Filtres rapides -->
+                <filter name="filter_outbound" string="Paiement sortant" domain="[('payment_type','=','outbound')]"/>
+                <filter name="filter_inbound" string="Paiement entrant" domain="[('payment_type','=','inbound')]"/>
+                <filter name="filter_draft" string="Brouillon" domain="[('state','=','draft')]"/>
+                <filter name="filter_in_process" string="En cours" domain="[('state','=','in_process')]"/>
+                <filter name="filter_partial_used" string="Partiellement utilisé" domain="[('state','=','partial_used')]"/>
+                <filter name="filter_paid" string="Payé" domain="[('state','=','paid')]"/>
+                <filter name="filter_received" string="Reçu" domain="[('state','=','received')]"/>
+
+                <separator/>
+
+                <!-- Group By -->
+                <filter name="group_by_payment_type" string="Type paiement" context="{'group_by':'payment_type'}"/>
+                <filter name="group_by_partner_type" string="Type partenaire" context="{'group_by':'partner_type'}"/>
+                <filter name="group_by_partner" string="Partenaire" context="{'group_by':'partner_id'}"/>
+                <filter name="group_by_source_payment" string="Paiement à annuler" context="{'group_by':'source_supplier_payment_id'}"/>
+                <filter name="group_by_state" string="Statut" context="{'group_by':'state'}"/>
+                <filter name="group_by_date" string="Date" context="{'group_by':'date'}"/>
+                <filter name="group_by_currency" string="Devise" context="{'group_by':'currency_id'}"/>
+
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

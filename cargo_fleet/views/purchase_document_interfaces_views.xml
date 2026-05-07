@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- ========================================================= -->
+    <!-- LISTE GENERALE DEPENSES VEHICULE                          -->
+    <!-- ========================================================= -->
+
+    <record id="view_purchase_order_vehicle_expense_tree_custom" model="ir.ui.view">
+        <field name="name">purchase.order.vehicle.expense.tree.custom</field>
+        <field name="model">purchase.order</field>
+        <field name="arch" type="xml">
+            <list string="Dépenses véhicule">
+                <field name="name" string="Référence" optional="show"/>
+                <field name="date_approve" string="Date de confirmation" optional="show"/>
+                <field name="partner_id" string="Fournisseur" optional="show"/>
+                <field name="user_id" string="Acheteur" optional="show"/>
+                <field name="state" string="Statut" optional="show"/>
+                <field name="date_planned" string="Arrivée prévue" optional="show"/>
+                <field name="vehicle_expense_amount" string="Montant HT" optional="show"/>
+                <field name="vehicle_expense_tax" string="Taxe" optional="show"/>
+                <field name="vehicle_expense_ttc" string="Montant TTC" optional="show"/>
+                <field name="vehicle_id" string="Véhicule" optional="show"/>
+                <field name="fleet_purchase_service_code" string="Type dépense" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- ACHAT ASSURANCE                                           -->
+    <!-- ========================================================= -->
+
+    <record id="view_purchase_order_assurance_tree_custom" model="ir.ui.view">
+        <field name="name">purchase.order.assurance.tree.custom</field>
+        <field name="model">purchase.order</field>
+        <field name="arch" type="xml">
+            <list string="Achat assurance">
+                <field name="name" string="Référence" optional="show"/>
+                <field name="license_plate" string="Immatriculation" optional="show"/>
+                <field name="numero_w" string="Numéro W" optional="show"/>
+                <field name="model_name" string="Modèle" optional="show"/>
+                <field name="brand_name" string="Marque" optional="show"/>
+                <field name="partner_id" string="Fournisseur" optional="show"/>
+                <field name="assurance_attestation_number" string="N° attestation" optional="show"/>
+                <field name="assurance_policy_number" string="Numéro police" optional="show"/>
+                <field name="assurance_type" string="Type assurance" optional="show"/>
+                <field name="assurance_amount" string="Montant" optional="show"/>
+                <field name="assurance_date_start" string="Date début" optional="show"/>
+                <field name="assurance_date_end" string="Date fin" optional="show"/>
+                <field name="state" string="Statut" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- ACHAT VIGNETTE                                            -->
+    <!-- ========================================================= -->
+
+    <record id="view_purchase_order_vignette_tree_custom" model="ir.ui.view">
+        <field name="name">purchase.order.vignette.tree.custom</field>
+        <field name="model">purchase.order</field>
+        <field name="arch" type="xml">
+            <list string="Achat vignette">
+                <field name="name" string="Référence" optional="show"/>
+                <field name="license_plate" string="Immatriculation" optional="show"/>
+                <field name="numero_w" string="Numéro W" optional="show"/>
+                <field name="model_name" string="Modèle" optional="show"/>
+                <field name="brand_name" string="Marque" optional="show"/>
+                <field name="partner_id" string="Fournisseur" optional="show"/>
+                <field name="vignette_number" string="Numéro" optional="show"/>
+                <field name="vignette_amount" string="Montant" optional="show"/>
+                <field name="vignette_date_start" string="Date début" optional="show"/>
+                <field name="vignette_date_end" string="Date fin" optional="show"/>
+                <field name="state" string="Statut" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- ACHAT VISITE TECHNIQUE                                    -->
+    <!-- ========================================================= -->
+
+    <record id="view_purchase_order_visite_tree_custom" model="ir.ui.view">
+        <field name="name">purchase.order.visite.tree.custom</field>
+        <field name="model">purchase.order</field>
+        <field name="arch" type="xml">
+            <list string="Achat visite technique">
+                <field name="name" string="Référence" optional="show"/>
+                <field name="license_plate" string="Immatriculation" optional="show"/>
+                <field name="numero_w" string="Numéro W" optional="show"/>
+                <field name="model_name" string="Modèle" optional="show"/>
+                <field name="brand_name" string="Marque" optional="show"/>
+                <field name="partner_id" string="Fournisseur" optional="show"/>
+                <field name="visite_number" string="Numéro" optional="show"/>
+                <field name="visite_type" string="Type visite technique" optional="show"/>
+                <field name="visite_center" string="Centre de visite technique" optional="show"/>
+                <field name="visite_amount" string="Montant" optional="show"/>
+                <field name="visite_date_start" string="Date début" optional="show"/>
+                <field name="visite_date_end" string="Date fin" optional="show"/>
+                <field name="state" string="Statut" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- ACTION DEPENSES VEHICULE                                  -->
+    <!-- ========================================================= -->
+
+    <record id="action_purchase_vehicle_expense_orders" model="ir.actions.act_window">
+        <field name="name">Dépenses véhicule</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="domain">[('vehicle_purchase_type', '=', 'expense')]</field>
+        <field name="context">{'default_vehicle_purchase_type': 'expense'}</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_purchase_order_vehicle_expense_tree_custom')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('purchase.purchase_order_form')})
+        ]"/>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- ACTION ASSURANCE                                          -->
+    <!-- ========================================================= -->
+
+    <record id="action_purchase_assurance_orders" model="ir.actions.act_window">
+        <field name="name">Achat assurance</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="domain">[
+            ('vehicle_purchase_type', '=', 'expense'),
+            ('fleet_purchase_service_code', '=', 'assurance')
+        ]</field>
+        <field name="context">{
+            'default_vehicle_purchase_type': 'expense',
+            'default_fleet_purchase_service_code': 'assurance'
+        }</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_purchase_order_assurance_tree_custom')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('purchase.purchase_order_form')})
+        ]"/>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- ACTION VIGNETTE                                           -->
+    <!-- ========================================================= -->
+
+    <record id="action_purchase_vignette_orders" model="ir.actions.act_window">
+        <field name="name">Achat vignette</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="domain">[
+            ('vehicle_purchase_type', '=', 'expense'),
+            ('fleet_purchase_service_code', '=', 'vignette')
+        ]</field>
+        <field name="context">{
+            'default_vehicle_purchase_type': 'expense',
+            'default_fleet_purchase_service_code': 'vignette'
+        }</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_purchase_order_vignette_tree_custom')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('purchase.purchase_order_form')})
+        ]"/>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- ACTION VISITE TECHNIQUE                                   -->
+    <!-- ========================================================= -->
+
+    <record id="action_purchase_visite_orders" model="ir.actions.act_window">
+        <field name="name">Achat visite technique</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="domain">[
+            ('vehicle_purchase_type', '=', 'expense'),
+            ('fleet_purchase_service_code', '=', 'visite_technique')
+        ]</field>
+        <field name="context">{
+            'default_vehicle_purchase_type': 'expense',
+            'default_fleet_purchase_service_code': 'visite_technique'
+        }</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_purchase_order_visite_tree_custom')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('purchase.purchase_order_form')})
+        ]"/>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- ACTION MAINTENANCE                                        -->
+    <!-- ========================================================= -->
+
+    <record id="action_purchase_maintenance_orders" model="ir.actions.act_window">
+        <field name="name">Achat maintenance</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="domain">[
+            ('vehicle_purchase_type', '=', 'expense'),
+            ('fleet_purchase_service_code', '=', 'maintenance')
+        ]</field>
+        <field name="context">{
+            'default_vehicle_purchase_type': 'expense',
+            'default_fleet_purchase_service_code': 'maintenance'
+        }</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_purchase_order_vehicle_expense_tree_custom')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('purchase.purchase_order_form')})
+        ]"/>
+    </record>
+    <record id="action_purchase_permis_circulation_orders" model="ir.actions.act_window">
+        <field name="name">Achat permis de circulation</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('vehicle_purchase_type', '=', 'expense'), ('fleet_purchase_service_code', '=', 'permis_circulation')]</field>
+        <field name="context">{'default_vehicle_purchase_type': 'expense', 'default_fleet_purchase_service_code': 'permis_circulation'}</field>
+    </record>
+
+    <record id="action_purchase_carte_grise_orders" model="ir.actions.act_window">
+        <field name="name">Achat carte grise</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('vehicle_purchase_type', '=', 'expense'), ('fleet_purchase_service_code', '=', 'carte_grise')]</field>
+        <field name="context">{'default_vehicle_purchase_type': 'expense', 'default_fleet_purchase_service_code': 'carte_grise'}</field>
+    </record>
+</odoo>

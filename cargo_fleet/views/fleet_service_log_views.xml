@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="fleet_vehicle_log_services_form_inherit_custom" model="ir.ui.view">
+        <field name="name">fleet.vehicle.log.services.form.inherit.custom</field>
+        <field name="model">fleet.vehicle.log.services</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_log_services_view_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Masquer description -->
+            <xpath expr="//field[@name='description']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- Masquer véhicule
+            <xpath expr="//field[@name='vehicle_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath> -->
+
+            <!-- Masquer conducteur -->
+            <xpath expr="//field[@name='purchaser_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- Masquer kilométrage -->
+            <xpath expr="//field[@name='odometer']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- Filtrer les types -->
+            <xpath expr="//field[@name='service_type_id']" position="attributes">
+                <attribute name="domain">[('service_code', 'in', ['maintenance', 'vignette', 'visite_technique', 'assurance'])]</attribute>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

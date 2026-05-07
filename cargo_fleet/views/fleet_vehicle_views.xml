@@ -1,0 +1,510 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_fleet_vehicle_form_inherit_custom" model="ir.ui.view">
+        <field name="name">fleet.vehicle.form.inherit.custom</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//group/group[.//field[@name='driver_id']]" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='plan_to_change_car']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//label[@for='plan_to_change_car']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='location']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//button[@name='open_assignation_logs']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='category_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//button[.//field[@name='service_count']]" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="(//sheet//group[.//field[@name='category_id']])[1]" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//button[.//field[@name='odometer_count']]" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//button[.//field[@name='contract_count']]" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='vin_sn']" position="replace"/>
+
+            <xpath expr="//sheet/notebook/page[1]" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='order_date']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='acquisition_date']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='write_off_date']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='tag_ids']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='odometer']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//div[field[@name='odometer']]" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='trailer_hook']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='co2_standard']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//label[@for='co2']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//div[field[@name='co2']]" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//label[@for='vehicle_range']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//div[field[@name='vehicle_range']]" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//page[@name='note']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='manager_id']" position="replace"/>
+
+            <xpath expr="//field[@name='state_id']" position="replace">
+                <field name="state_id" widget="statusbar"/>
+            </xpath>
+
+            <xpath expr="//field[@name='state_id']" position="after">
+                <field name="vehicle_info_confirmed" invisible="1"/>
+
+                <button name="action_confirm_vehicle_info"
+                        type="object"
+                        string="Confirmer les infos"
+                        class="btn-primary"
+                        invisible="vehicle_info_confirmed or not can_edit_vehicle"/>
+
+                <button name="action_block_vehicle"
+                        type="object"
+                        string="Bloquer"
+                        class="btn-danger"
+                        invisible="not can_block_vehicle"/>
+
+                <button name="action_unblock_vehicle"
+                        type="object"
+                        string="Débloquer"
+                        class="btn-success"
+                        invisible="not can_unblock_vehicle"/>
+            </xpath>
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+
+                <button name="action_open_purchase_contracts"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-shopping-cart"
+                        invisible="type_acquisition != 'achat'">
+                    <field name="purchase_contract_count"
+                           widget="statinfo"
+                           string="Contrats achat"/>
+                </button>
+
+                <button name="action_open_leasing_contracts"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-file-text-o"
+                        invisible="type_acquisition != 'leasing'">
+                    <field name="leasing_contract_count"
+                           widget="statinfo"
+                           string="Contrats leasing"/>
+                </button>
+
+                <button name="action_open_vehicle_expenses"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-wrench">
+                    <field name="purchase_expense_count"
+                           widget="statinfo"
+                           string="Dépenses véhicule"/>
+                </button>
+
+                <button name="action_open_penalite_expenses"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-exclamation-triangle">
+                    <field name="penalite_count"
+                           widget="statinfo"
+                           string="Pénalités"/>
+                </button>
+
+                <button name="action_open_sale_orders"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-money">
+                    <field name="sale_order_count"
+                           widget="statinfo"
+                           string="Contrats vente"/>
+                </button>
+                <button name="action_open_rental_contracts"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-car">
+                    <field name="rental_contract_count"
+                        widget="statinfo"
+                        string="Contrats location"/>
+                </button>
+                <button name="action_open_admin_docs"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-file-text-o">
+                    <field name="administrative_document_count"
+                           widget="statinfo"
+                           string="Documents"/>
+                </button>
+
+            </xpath>
+
+            <xpath expr="//sheet/notebook" position="inside">
+
+                <page string="Informations du véhicule">
+                    <group string="Informations générales" col="2">
+
+                        <group>
+                            <field name="numero_w"
+                                   string="Numéro W"
+                                   required="1"
+                                   readonly="not can_edit_vehicle"/>
+
+                            <field name="model_id"
+                                   string="Modèle"
+                                   required="1"
+                                   readonly="not can_edit_vehicle"/>
+
+                            <field name="type_acquisition"
+                                   required="1"
+                                   readonly="not can_edit_vehicle"/>
+
+                            <field name="category_id"
+                                   string="Catégorie"
+                                   readonly="not can_edit_vehicle"/>
+
+                            <field name="vehicle_code" readonly="not can_edit_vehicle"/>
+                            <field name="date_mise_circulation" required="1" readonly="not can_edit_vehicle"/>
+                            <field name="cost_center" readonly="not can_edit_vehicle"/>
+                            <field name="order_number" readonly="not can_edit_vehicle"/>
+                            <field name="registration_card" readonly="not can_edit_vehicle"/>
+                            <field name="fuel_type" readonly="not can_edit_vehicle"/>
+                            <field name="state_id" readonly="1"/>
+                            <field name="vehicle_genre" readonly="not can_edit_vehicle"/>
+                            <field name="service_name" readonly="not can_edit_vehicle"/>
+                            <field name="driver_activity" readonly="not can_edit_vehicle"/>
+                            <field name="key_code" readonly="not can_edit_vehicle"/>
+                            <field name="initial_odometer" readonly="not can_edit_vehicle"/>
+                            <field name="planned_return_date" readonly="not can_edit_vehicle"/>
+                            <field name="initial_hour_index" readonly="not can_edit_vehicle"/>
+                        </group>
+
+                        <group>
+                            <field name="vin_sn"
+                                   string="N° de châssis"
+                                   required="1"
+                                   readonly="not can_edit_vehicle"/>
+
+                            <field name="dealer_id" required="1" readonly="not can_edit_vehicle"/>
+                            <field name="purchase_date" required="1" readonly="not can_edit_vehicle"/>
+                            <field name="warranty" readonly="not can_edit_vehicle"/>
+                            <field name="amount_ht" readonly="not can_edit_vehicle"/>
+                            <field name="tax_id" readonly="not can_edit_vehicle"/>
+                            <field name="amount_ttc" readonly="1"/>
+                            <field name="product_account_number" readonly="not can_edit_vehicle"/>
+                            <field name="leasing_account_number" readonly="not can_edit_vehicle"/>
+                            <field name="date_added" readonly="1"/>
+                            <field name="main_attachment"
+                                   filename="main_attachment_filename"
+                                   readonly="not can_edit_vehicle"/>
+                            <field name="main_attachment_filename" invisible="1"/>
+                        </group>
+
+                    </group>
+
+                    <group string="Commentaire">
+                        <field name="description" readonly="not can_edit_vehicle"/>
+                    </group>
+                </page>
+
+                <page string="Carte grise">
+                    <field name="registration_doc_ids"
+                           context="{'default_vehicle_id': id, 'default_document_type': 'carte_grise'}">
+                        <list create="0" edit="0" delete="0">
+                            <field name="name" string="Document"/>
+                            <field name="date_start" string="Date début"/>
+                            <field name="date_end" string="Date fin"/>
+                            <field name="state" string="Statut"/>
+                            <field name="bill_id" string="Facture"/>
+                        </list>
+                    </field>
+                </page>
+
+                <page string="Permis de circulation">
+                    <separator string="Lignes générées"/>
+
+                    <field name="circulation_permit_doc_ids" nolabel="1">
+                        <list create="0" edit="0" delete="0">
+                            <field name="name" string="Document"/>
+                            <field name="date_start" string="Date début"/>
+                            <field name="date_end" string="Date fin"/>
+                            <field name="state" string="Statut"/>
+                            <field name="bill_id" string="Facture"/>
+                        </list>
+                    </field>
+                </page>
+
+                <page string="Vignette">
+                    <group string="Première ligne vignette" col="4">
+                        <field name="vignette_first_date_start" string="Date début" />
+                        <field name="vignette_first_date_end" string="Date fin" />
+                    </group>
+
+                    <group>
+                        <button name="action_generate_first_manual_documents"
+                                type="object"
+                                string="Générer les premières lignes"
+                                class="btn-primary"/>
+                    </group>
+
+                    <separator string="Lignes générées"/>
+
+                    <field name="vignette_doc_ids" nolabel="1">
+                        <list create="0" edit="0" delete="0">
+                            <field name="name" string="Document"/>
+                            <field name="date_start" string="Date début"/>
+                            <field name="date_end" string="Date fin"/>
+                            <field name="state" string="Statut"/>
+                            <field name="bill_id" string="Facture"/>
+                        </list>
+                    </field>
+                </page>
+
+                <page string="Assurance">
+                    <group string="Première ligne assurance" col="4">
+                        <field name="assurance_first_date_start" string="Date début" />
+                        <field name="assurance_first_date_end" string="Date fin"/>
+                    </group>
+
+                    <group>
+                        <button name="action_generate_first_manual_documents"
+                                type="object"
+                                string="Générer les premières lignes"
+                                class="btn-primary"/>
+                    </group>
+
+                    <separator string="Lignes générées"/>
+
+                    <field name="insurance_doc_ids" nolabel="1">
+                        <list create="0" edit="0" delete="0">
+                            <field name="name" string="Document"/>
+                            <field name="date_start" string="Date début"/>
+                            <field name="date_end" string="Date fin"/>
+                            <field name="state" string="Statut"/>
+                            <field name="bill_id" string="Facture"/>
+                        </list>
+                    </field>
+                </page>
+
+                <page string="Visite technique">
+
+                    <field name="technical_visit_doc_ids" nolabel="1">
+                        <list create="0" edit="0" delete="0">
+                            <field name="name" string="Document"/>
+                            <field name="date_start" string="Date début"/>
+                            <field name="date_end" string="Date fin"/>
+                            <field name="state" string="Statut"/>
+                            <field name="bill_id" string="Facture"/>
+                        </list>
+                    </field>
+                </page>
+
+                <page string="Écritures comptables">
+                    <field name="account_move_line_ids">
+                        <list editable="bottom">
+                            <field name="account_id" string="Compte"/>
+                            <field name="partner_id" string="Partenaire"/>
+                            <field name="name" string="Libellé"/>
+                            <field name="analytic_distribution" string="Répartition analytique"/>
+                            <field name="debit" string="Débit"/>
+                            <field name="credit" string="Crédit"/>
+                            <field name="tax_ids" widget="many2many_tags" string="Grilles de taxes"/>
+                        </list>
+                    </field>
+                </page>
+
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="view_fleet_vehicle_list_inherit_custom" model="ir.ui.view">
+        <field name="name">fleet.vehicle.list.inherit.custom</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_view_tree"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='tag_ids']" position="replace"/>
+            <xpath expr="//field[@name='contract_renewal_due_soon']" position="replace"/>
+            <xpath expr="//field[@name='contract_renewal_overdue']" position="replace"/>
+            <xpath expr="//list/field[@name='driver_id']" position="replace"/>
+            <xpath expr="//list/field[@name='future_driver_id']" position="replace"/>
+            <xpath expr="//list/field[@name='model_id']" position="replace"/>
+            <xpath expr="//list/field[@name='category_id']" position="replace"/>
+
+            <xpath expr="//list/field[@name='license_plate']" position="after">
+                <field name="numero_w" string="Numéro W"/>
+                <field name="type_acquisition" string="Type d'acquisition"/>
+                <field name="model_name" string="Modèle"/>
+                <field name="brand_name" string="Marque"/>
+                <field name="category_id" string="Catégorie"/>
+                <field name="fleet_name" string="Flotte"/>
+                <field name="vin_sn" string="N° de châssis"/>
+                <field name="dealer_id"/>
+                <field name="order_number" string="Numéro d'ordre"/>
+                <field name="date_mise_circulation" string="DMC"/>
+                <field name="initial_odometer" string="Kilométrage"/>
+                <field name="product_account_number" string="Numéro compte produit"/>
+                <field name="leasing_account_number" string="Numéro compte leasing"/>
+                <field name="date_added" string="Date d’ajout"/>
+                <field name="attachment_count_custom" string="Attachement"/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="view_fleet_vehicle_search_custom" model="ir.ui.view">
+        <field name="name">fleet.vehicle.search.custom</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="arch" type="xml">
+            <search string="Recherche véhicule">
+
+                <field name="license_plate" string="Immatriculation"/>
+                <field name="numero_w" string="Numéro W"/>
+                <field name="type_acquisition" string="Type d'acquisition"/>
+                <field name="model_name" string="Modèle"/>
+                <field name="brand_name" string="Marque"/>
+                <field name="category_id" string="Catégorie"/>
+                <field name="fleet_name" string="Flotte"/>
+                <field name="state_id" string="Statut"/>
+                <field name="vin_sn" string="N° de châssis"/>
+                <field name="dealer_id" string="Fournisseur"/>
+                <field name="order_number" string="Numéro d'ordre"/>
+                <field name="date_mise_circulation" string="DMC"/>
+                <field name="initial_odometer" string="Kilométrage"/>
+                <field name="product_account_number" string="Numéro compte produit"/>
+                <field name="leasing_account_number" string="Numéro compte leasing"/>
+                <field name="date_added" string="Date d’ajout"/>
+
+                <separator/>
+
+                <filter string="Achat" name="filter_achat"
+                        domain="[('type_acquisition', '=', 'achat')]"/>
+
+                <filter string="Leasing" name="filter_leasing"
+                        domain="[('type_acquisition', '=', 'leasing')]"/>
+
+                <separator/>
+
+                <filter string="Avec immatriculation" name="f_license_plate"
+                        domain="[('license_plate', '!=', False)]"/>
+
+                <filter string="Avec N° W" name="f_numero_w"
+                        domain="[('numero_w', '!=', False)]"/>
+
+                <filter string="Avec type acquisition" name="f_type_acquisition"
+                        domain="[('type_acquisition', '!=', False)]"/>
+
+                <filter string="Avec modèle" name="f_model"
+                        domain="[('model_name', '!=', False)]"/>
+
+                <filter string="Avec marque" name="f_brand"
+                        domain="[('brand_name', '!=', False)]"/>
+
+                <filter string="Avec catégorie" name="f_category"
+                        domain="[('category_id', '!=', False)]"/>
+
+                <filter string="Avec flotte" name="f_fleet"
+                        domain="[('fleet_name', '!=', False)]"/>
+
+                <filter string="Avec statut" name="f_state"
+                        domain="[('state_id', '!=', False)]"/>
+
+                <filter string="Avec N° châssis" name="f_vin"
+                        domain="[('vin_sn', '!=', False)]"/>
+
+                <filter string="Avec fournisseur" name="f_dealer"
+                        domain="[('dealer_id', '!=', False)]"/>
+
+                <filter string="Avec N° ordre" name="f_order"
+                        domain="[('order_number', '!=', False)]"/>
+
+                <filter string="Avec DMC" name="f_dmc"
+                        domain="[('date_mise_circulation', '!=', False)]"/>
+
+                <filter string="Avec kilométrage" name="f_odometer"
+                        domain="[('initial_odometer', '!=', False)]"/>
+
+                <filter string="Avec compte produit" name="f_product_account"
+                        domain="[('product_account_number', '!=', False)]"/>
+
+                <filter string="Avec compte leasing" name="f_leasing_account"
+                        domain="[('leasing_account_number', '!=', False)]"/>
+
+                <filter string="Avec date ajout" name="f_date_added"
+                        domain="[('date_added', '!=', False)]"/>
+
+            </search>
+        </field>
+    </record>
+
+    <record id="fleet.fleet_vehicle_action" model="ir.actions.act_window">
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="view_id" ref="fleet.fleet_vehicle_view_tree"/>
+        <field name="search_view_id" ref="view_fleet_vehicle_search_custom"/>
+    </record>
+    <record id="fleet.fleet_vehicle_odometer_menu" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
+</odoo>
