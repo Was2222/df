@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<record id="sale_order_rental_form_view_clean" model="ir.ui.view">
+    <field name="name">sale.order.rental.form.clean</field>
+    <field name="model">sale.order</field>
+    <field name="inherit_id" ref="sale.view_order_form"/>
+    <field name="arch" type="xml">
+
+        <!-- ======================================================
+             SUPPRESSION BOUTONS STANDARD ODOO (niveau racine !)
+        ====================================================== -->
+        <!-- Masquer bouton Confirmer -->
+
+        <!-- ======================================================
+             BOUTONS CUSTOM DANS LE HEADER
+        ====================================================== -->
+        <!-- Vider complètement le header existant -->
+<xpath expr="//header" position="replace">
+    <header>
+        <button name="action_submit_approval"
+                string="📤 Soumettre"
+                type="object"
+                class="btn-primary"
+                invisible="not is_rental_order or approval_status != 'draft'"/>
+
+        <button name="action_approve"
+                string="✅ Approuver"
+                type="object"
+                class="btn-success"
+                invisible="approval_status != 'pending'"/>
+
+        <button name="action_reject"
+                string="❌ Rejeter"
+                type="object"
+                class="btn-danger"
+                invisible="approval_status != 'pending'"/>
+
+        <button name="action_convert_to_contract"
+                string="🎉 Convertir contrat"
+                type="object"
+                class="btn-success"
+                invisible="approval_status != 'approved'"/>
+
+        <button name="action_view_rental_contract"
+                string="📄 Contrat"
+                type="object"
+                class="btn-info"
+                invisible="not fleet_contract_id"/>
+
+    
+
+        <!-- Imprimer PDF -->
+        <button name="%(sale.action_report_saleorder)d"
+                string="🖨️ Imprimer"
+                type="action"
+                class="btn-secondary"/>
+
+        <field name="state"
+               widget="statusbar"
+               statusbar_visible="draft,sale,done,cancel"
+               invisible="1"/>
+    </header>
+</xpath>
+
+        <xpath expr="//field[@name='partner_id']" position="before">
+            <field name="lead_rental_reference"
+                   string="Réf. réservation"
+                   readonly="1"
+                   invisible="not lead_rental_reference"
+                   class="fw-bold text-primary"/>
+            <field name="lead_source" string="Source" readonly="1" invisible="not lead_source"/>
+            <field name="is_contract_converted" invisible="1"/>
+        </xpath>
+
+        <xpath expr="//field[@name='date_order']" position="after">
+            <field name="opportunity_id" string="Opportunité" readonly="1" invisible="not opportunity_id"/>
+        </xpath>
+
+        <xpath expr="//field[@name='partner_id']" position="after">
+            <field name="fleet_contract_name"
+                   string="Contrat associé"
+                   readonly="1"
+                   invisible="not fleet_contract_id or fleet_contract_state != 'lance'"
+                   class="text-success"/>
+        </xpath>
+
+        <!-- ======================================================
+             SUPPRESSION STATUSBAR ODOO
+        ====================================================== -->
+        <xpath expr="//field[@name='state']" position="replace"/>
+
+        <!-- ======================================================
+             STATUSBAR CUSTOM
+        ====================================================== -->
+        <xpath expr="//header" position="after">
+            <div class="o_statusbar_status" invisible="not is_rental_order">
+                <field name="rental_quotation_status"
+                       widget="statusbar"
+                       statusbar_visible="draft,sent,won,lost"
+                       readonly="1"/>
+            </div>
+        </xpath>
+        
+
+        <!-- ======================================================
+             MASQUAGE CHAMPS INUTILES
+        ====================================================== -->
+        <xpath expr="//field[@name='validity_date']" position="replace"/>
+        <xpath expr="//field[@name='payment_term_id']" position="replace"/>
+        <xpath expr="//field[@name='vehicle_id']" position="replace"/>
+
+        <!-- ======================================================
+             ONGLET LOCATION
+        ====================================================== -->
+        <xpath expr="//notebook/page[@name='other_information']" position="before">
+            <page string="🚗 Location" name="rental_tab" invisible="not is_rental_order">
+
+                <group col="2">
+                    <group string="Véhicule et contrat">
+                        <field name="vehicle_category_id"
+                               options="{'no_create': True}"
+                               required="is_rental_order"
+                               readonly="state in ['sale', 'done', 'cancel'] or is_contract_converted"/>
+                        <field name="contract_type"
+                               required="is_rental_order"
+                               readonly="state in ['sale', 'done', 'cancel'] or is_contract_converted"/>
+                        <field name="rental_tariff_unit"
+                               readonly="1"
+                               invisible="not rental_tariff_id"/>
+                    </group>
+
+                    <group string="Période">
+                        <field name="rent_start_datetime"
+                               required="is_rental_order"
+                               readonly="state in ['sale', 'done', 'cancel'] or is_contract_converted"/>
+                        <field name="rent_end_datetime"
+                               required="is_rental_order"
+                               readonly="state in ['sale', 'done', 'cancel'] or is_contract_converted"/>
+                        <field name="number_of_days" readonly="1"/>
+                        <field name="number_of_months"
+                               readonly="1"
+                               invisible="contract_type not in ['medium', 'long']"/>
+                    </group>
+                </group>
+
+                <group col="2">
+                    <group string="Tarification">
+                        <field name="rental_tariff_id"
+                               options="{'no_create': True}"
+                               readonly="state in ['sale', 'done', 'cancel'] or is_contract_converted"/>
+                        <field name="rental_price_ht"
+                               currency_field="currency_id"
+                               readonly="state in ['sale', 'done', 'cancel'] or is_contract_converted"/>
+                        <field name="rental_vat_percent"
+                               readonly="state in ['sale', 'done', 'cancel'] or is_contract_converted"/>
+                        <field name="discount_percent"
+                               readonly="state in ['sale', 'done', 'cancel'] or is_contract_converted"/>
+                        <field name="rounded"
+                               readonly="state in ['sale', 'done', 'cancel'] or is_contract_converted"/>
+                    </group>
+
+                    <group string="Totaux" invisible="not rental_price_ht">
+                        <field name="rental_price_after_discount"
+                               currency_field="currency_id"
+                               readonly="1"
+                               string="Prix unitaire remisé"/>
+                        <field name="rental_total_ht"
+                               currency_field="currency_id"
+                               readonly="1"
+                               string="Total HT"/>
+                        <field name="rental_total_ttc"
+                               currency_field="currency_id"
+                               readonly="1"
+                               string="Total TTC"/>
+                    </group>
+                </group>
+
+                <group string="Notes">
+                    <field name="rental_notes"
+                           nolabel="1"
+                           readonly="state in ['sale', 'done', 'cancel'] or is_contract_converted"/>
+                </group>
+
+            </page>
+
+            <!-- ======================================================
+                 ONGLET APPROBATION
+            ====================================================== -->
+            <page string="Approbation" invisible="approval_status == 'draft'">
+                <group col="2">
+                    <field name="approved_by" readonly="1"/>
+                    <field name="approval_date" readonly="1"/>
+                </group>
+                <group>
+                    <field name="approval_notes"/>
+                </group>
+            </page>
+        </xpath>
+
+        <!-- ======================================================
+             CHAMPS TECHNIQUES CACHÉS
+        ====================================================== -->
+        <xpath expr="//sheet" position="inside">
+            <group invisible="1">
+                <field name="is_rental_order"/>
+                <field name="approval_status"/>
+                <field name="fleet_contract_id"/>
+                <field name="fleet_contract_state"/>
+                <field name="lead_source"/>
+                <field name="opportunity_id"/>
+            </group>
+        </xpath>
+
+        <!-- ======================================================
+             MASQUER SIGNATURE CLIENT
+        ====================================================== -->
+        <xpath expr="//page[@name='customer_signature']" position="attributes">
+            <attribute name="invisible">1</attribute>
+        </xpath>
+
+    </field>
+</record>
+
+<!-- =========================================================
+     TREE VIEW
+========================================================= -->
+<record id="sale_order_rental_list_view_clean" model="ir.ui.view">
+    <field name="name">sale.order.rental.list.clean</field>
+    <field name="model">sale.order</field>
+    <field name="inherit_id" ref="sale.view_quotation_tree"/>
+    <field name="arch" type="xml">
+        <xpath expr="//list" position="inside">
+            <field name="approval_status" string="Statut"/>
+            <field name="lead_rental_reference" string="Réf"/>
+            <field name="partner_id" string="Client"/>
+            <field name="vehicle_category_id" string="Catégorie"/>
+            <field name="rent_start_datetime" string="Début"/>
+            <field name="rent_end_datetime" string="Fin"/>
+            <field name="rental_total_ht" string="Total HT" sum="Total"/>
+            <field name="advance_amount"
+                   string="Avance"
+                   sum="Total avances"
+                   widget="monetary"
+                   options="{'currency_field': 'currency_id'}"/>
+            <field name="fleet_contract_name" string="Contrat"/>
+        </xpath>
+    </field>
+</record>
+
+<!-- =========================================================
+     SEARCH VIEW
+========================================================= -->
+<record id="sale_order_rental_search_view_clean" model="ir.ui.view">
+    <field name="name">sale.order.rental.search.clean</field>
+    <field name="model">sale.order</field>
+    <field name="inherit_id" ref="sale.view_sales_order_filter"/>
+    <field name="arch" type="xml">
+        <xpath expr="//search" position="inside">
+            <filter string="🚗 Locations"
+                    name="is_rental"
+                    domain="[('is_rental_order', '=', True)]"/>
+            <separator/>
+            <filter string="⏳ En attente"
+                    name="pending"
+                    domain="[('approval_status','=','pending')]"/>
+            <filter string="✅ Approuvées"
+                    name="approved"
+                    domain="[('approval_status','=','approved')]"/>
+            <filter string="🎉 Contrats"
+                    name="converted"
+                    domain="[('fleet_contract_id','!=',False)]"/>
+            <filter string="❌ Rejetées"
+                    name="rejected"
+                    domain="[('approval_status','=','rejected')]"/>
+            <separator/>
+            <field name="partner_id"/>
+            <field name="lead_rental_reference"/>
+            <field name="vehicle_category_id"/>
+            <separator/>
+            <filter string="Statut"
+                    name="group_status"
+                    context="{'group_by':'approval_status'}"/>
+        </xpath>
+    </field>
+</record>
+
+</odoo>

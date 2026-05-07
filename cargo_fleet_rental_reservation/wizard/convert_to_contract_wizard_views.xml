@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="crm_rental_convert_wizard_form" model="ir.ui.view">
+        <field name="name">crm.rental.convert.wizard.form</field>
+        <field name="model">crm.rental.convert.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Convertir en contrat de location">
+
+                <!-- Bannière principale -->
+                <div class="alert alert-success o_no_print mb-2 py-2" role="alert">
+                    <strong>✅ Devis approuvé —</strong>
+                    Vérifiez les informations ci-dessous puis créez le contrat.
+                    Vous pourrez ensuite affecter un véhicule et le lancer.
+                </div>
+
+                <!-- Info devis source -->
+               <div class="alert alert-info o_no_print mb-2 py-2" role="alert" invisible="not source_order_id">
+    <i class="fa fa-file-text-o"/> 
+    <strong>Devis source :</strong> <field name="source_order_id" readonly="1" nolabel="1"/>
+    <span invisible="not source_order_approved_by">
+        — Approuvé par <field name="source_order_approved_by" readonly="1" nolabel="1"/>
+        le <field name="source_order_approval_date" readonly="1" nolabel="1"/>
+    </span>
+</div>
+                <!-- Référence réservation visible en haut -->
+                <div class="text-muted mb-2" invisible="not lead_rental_reference">
+                    <i class="fa fa-tag"/> Réf. réservation : <strong><field name="lead_rental_reference" readonly="1" nolabel="1"/></strong>
+                </div>
+
+                <notebook>
+
+                    <!-- ── ONGLET 1 : Contrat ── -->
+                    <page string="📋 Contrat" name="contract_info">
+
+                        <group>
+                            <!-- Colonne gauche -->
+                            <group string="Opportunité &amp; client">
+                                <field name="lead_id"              readonly="1"/>
+                                <field name="customer_id"
+                                       options="{'no_create': True}" readonly="1"/>
+                                <field name="contract_type"        readonly="1"/>
+                                <field name="vehicle_category_id"
+                                       options="{'no_create': True}" readonly="1"/>
+                            </group>
+
+                            <!-- Colonne droite -->
+                            <group string="Période de location">
+                                <field name="rent_start_datetime"  readonly="1"/>
+                                <field name="rent_end_datetime"    readonly="1"/>
+                                <field name="number_of_days"       readonly="1"/>
+                                <field name="number_of_months"     readonly="1"
+                                       invisible="contract_type == 'short'"/>
+                            </group>
+                        </group>
+
+                        <group string="Tarification">
+                            <group>
+                                <field name="unit_price_ht" required="1"
+                                       help="Par jour (courte durée) ou par mois (moyenne/longue durée)"/>
+                                <field name="discount_percent"/>
+                                <field name="vat_percent"/>
+                                <field name="rounded"/>
+                            </group>
+                            <group>
+                                <field name="unit_price_after_discount" readonly="1"/>
+                                <field name="estimated_total_ht"        readonly="1"/>
+                                <field name="estimated_total_ttc"       readonly="1"/>
+                            </group>
+                        </group>
+
+                    </page>
+
+                    <!-- ── ONGLET 2 : Avance (courte/moyenne durée) ── -->
+                    <page string="💳 Avance de paiement" name="advance_info">
+
+                        <!-- Bandeau : avance obligatoire -->
+                        <div class="alert alert-warning o_no_print py-2 mb-3"
+                             role="alert"
+                             invisible="not advance_required">
+                            <strong>⚠️ Obligatoire pour ce type de contrat.</strong>
+                            Sélectionnez un paiement client déjà enregistré dans la comptabilité
+                            (non lié à un contrat ou une facture).
+                            Si aucun paiement n'apparaît, enregistrez-le d'abord.
+                        </div>
+
+                        <!-- Bandeau : avance non requise -->
+                        <div class="alert alert-info o_no_print py-2 mb-3"
+                             role="alert"
+                             invisible="advance_required">
+                            <strong>ℹ️ Aucune avance requise</strong> pour les contrats de longue durée.
+                        </div>
+
+                        <!-- Champ hidden pour la règle de visibilité -->
+                        <field name="advance_required" invisible="1"/>
+
+                        <group string="Paiement d'avance">
+                            <group>
+                                <!-- Sélection du paiement client non lié -->
+                                <field name="advance_payment_id"
+                                       options="{'no_create': True}"
+                                       required="advance_required"
+                                       widget="many2one"
+                                       help="Seuls les paiements validés du client, non liés à un contrat ou une facture, sont proposés."/>
+                            </group>
+                            <group string="Détails du paiement sélectionné"
+                                   invisible="not advance_payment_id">
+                                <field name="advance_amount"        readonly="1"/>
+                                <field name="advance_payment_date"  readonly="1"/>
+                                <field name="advance_payment_ref"   readonly="1"
+                                       invisible="not advance_payment_ref"/>
+                            </group>
+                        </group>
+
+                        <group string="Observations">
+                            <field name="advance_notes"
+                                   nolabel="1"
+                                   placeholder="Remarques complémentaires sur l'avance (optionnel)…"/>
+                        </group>
+
+                    </page>
+
+                </notebook>
+
+                <footer>
+                    <button name="action_confirm_conversion"
+                            string="✅ Créer le contrat"
+                            type="object"
+                            class="btn-primary"/>
+                    <button string="Annuler" class="btn-secondary" special="cancel"/>
+                </footer>
+
+            </form>
+        </field>
+    </record>
+
+</odoo>

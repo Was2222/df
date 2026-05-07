@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+       
+
+        <!-- AJOUT 2 : Converti en contrat -->
+        <record id="crm_stage_rental_converti" model="crm.stage">
+            <field name="name">Converti en contrat</field>
+            <field name="sequence">55</field>
+            <field name="is_won">True</field>
+            <field name="requirements">
+                - Devis accepté
+                - Paiement ou avance validée
+                - Contrat de location créé
+            </field>
+        </record>
+
+    </data>
+</odoo>

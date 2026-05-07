@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_fleet_location_tracking_tree" model="ir.ui.view">
+        <field name="name">fleet.location.tracking.tree</field>
+        <field name="model">fleet.location.tracking</field>
+        <field name="arch" type="xml">
+            <list string="Suivi comptable location"
+                create="0"
+                decoration-success="not is_negative_line"
+                decoration-danger="is_negative_line">
+
+                <field name="date_operation"/>
+                <field name="vehicle_id"/>
+                <field name="numero_w" optional="show"/>
+                <field name="immatriculation" optional="show"/>
+                <field name="modele" optional="show"/>
+                <field name="marque" optional="show"/>
+                <field name="vin_sn" optional="hide"/>
+                <field name="document_id" optional="show"/>
+
+                <field name="nature_operation_label" string="Nature d'opération"/>
+                <field name="type_operation_label" string="Type"/>
+                <field name="partner_id" optional="show"/>
+                <field name="product_id" optional="show"/>
+
+                <field name="display_montant_ht" string="Montant HT" sum="Total HT"/>
+                <field name="display_taxe" string="Taxe" sum="Total taxe"/>
+                <field name="display_montant_ttc" string="Montant TTC" sum="Total TTC"/>
+
+                <field name="sale_order_id" optional="hide"/>
+                <field name="bill_id" optional="show"/>
+                <field name="user_id" optional="hide"/>
+
+                <button name="action_open_ecriture_comptable"
+                        type="object"
+                        string="Écriture comptable"
+                        class="btn-link"
+                        invisible="not bill_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_fleet_location_tracking_form" model="ir.ui.view">
+        <field name="name">fleet.location.tracking.form</field>
+        <field name="model">fleet.location.tracking</field>
+        <field name="arch" type="xml">
+            <form string="Suivi comptable location" create="0" edit="0">
+                <sheet>
+                    <group col="2">
+                        <group string="Informations générales">
+                            <field name="name" readonly="1"/>
+                            <field name="vehicle_id" readonly="1"/>
+                            <field name="nature_operation_label" string="Nature d'opération" readonly="1"/>
+                            <field name="type_operation_label" string="Type" readonly="1"/>
+                            <field name="service_code_label" string="Code service" readonly="1"/>
+                            <field name="date_operation" readonly="1"/>
+                            <field name="partner_id" readonly="1"/>
+                            <field name="product_id" readonly="1"/>
+                        </group>
+
+                        <group string="Montants">
+                            <field name="display_montant_ht" string="Montant HT" readonly="1"/>
+                            <field name="display_taxe" string="Taxe" readonly="1"/>
+                            <field name="display_montant_ttc" string="Montant TTC" readonly="1"/>
+                            <field name="user_id" readonly="1"/>
+                            <field name="date_creation" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <group string="Documents liés" col="2">
+                        <group>
+                            <field name="sale_order_id" readonly="1"/>
+                            <field name="bill_id" readonly="1"/>
+                            <field name="invoice_reference" readonly="1"/>
+                            <field name="document_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="source_model" readonly="1"/>
+                            <field name="source_res_id" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <group string="Commentaire">
+                        <field name="note" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_fleet_location_tracking_search" model="ir.ui.view">
+        <field name="name">fleet.location.tracking.search</field>
+        <field name="model">fleet.location.tracking</field>
+        <field name="arch" type="xml">
+            <search string="Recherche suivi comptable">
+                <field name="name"/>
+                <field name="vehicle_id"/>
+                <field name="numero_w"/>
+                <field name="immatriculation"/>
+                <field name="modele"/>
+                <field name="marque"/>
+                <field name="vin_sn"/>
+                <field name="nature_operation"/>
+                <field name="type_operation"/>
+                <field name="service_code"/>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="date_operation"/>
+                <field name="purchase_order_id"/>
+                <field name="sale_order_id"/>
+                <field name="bill_id"/>
+                <field name="document_id"/>
+                <field name="invoice_reference"/>
+                <field name="move_name"/>
+                <field name="user_id"/>
+                <field name="source_model"/>
+                <field name="source_res_id"/>
+
+                <separator/>
+
+                <filter name="filter_depense" string="Dépenses" domain="[('nature_operation', '=', 'depense')]"/>
+                <filter name="filter_leasing" string="Leasing" domain="[('nature_operation', '=', 'leasing')]"/>
+                <filter name="filter_location" string="Location" domain="[('nature_operation', '=', 'location')]"/>
+                <filter name="filter_cession" string="Cession" domain="[('nature_operation', '=', 'cession')]"/>
+
+                <separator/>
+
+                <filter name="filter_assurance" string="Assurance" domain="[('type_operation', '=', 'assurance')]"/>
+                <filter name="filter_vignette" string="Vignette" domain="[('type_operation', '=', 'vignette')]"/>
+                <filter name="filter_visite" string="Visite technique" domain="[('type_operation', '=', 'visite_technique')]"/>
+                <filter name="filter_jawaz" string="Jawaz" domain="[('type_operation', '=', 'jawaz')]"/>
+                <filter name="filter_carburant" string="Carburant" domain="[('type_operation', '=', 'carburant')]"/>
+                <filter name="filter_carte_verte" string="Carte verte" domain="[('type_operation', '=', 'carte_verte')]"/>
+                <filter name="filter_vente" string="Vente" domain="[('type_operation', '=', 'vente')]"/>
+
+                <separator/>
+
+                <filter name="group_by_vehicle" string="Véhicule" context="{'group_by': 'vehicle_id'}"/>
+                <filter name="group_by_numero_w" string="Numéro W" context="{'group_by': 'numero_w'}"/>
+                <filter name="group_by_immatriculation" string="Immatriculation" context="{'group_by': 'immatriculation'}"/>
+                <filter name="group_by_modele" string="Modèle" context="{'group_by': 'modele'}"/>
+                <filter name="group_by_marque" string="Marque" context="{'group_by': 'marque'}"/>
+                <filter name="group_by_nature" string="Nature" context="{'group_by': 'nature_operation'}"/>
+                <filter name="group_by_type" string="Type" context="{'group_by': 'type_operation'}"/>
+                <filter name="group_by_service" string="Code service" context="{'group_by': 'service_code'}"/>
+                <filter name="group_by_partner" string="Tiers" context="{'group_by': 'partner_id'}"/>
+                <filter name="group_by_product" string="Produit" context="{'group_by': 'product_id'}"/>
+                <filter name="group_by_date" string="Date" context="{'group_by': 'date_operation'}"/>
+                <filter name="group_by_purchase" string="Bon de commande" context="{'group_by': 'purchase_order_id'}"/>
+                <filter name="group_by_sale" string="Commande vente" context="{'group_by': 'sale_order_id'}"/>
+                <filter name="group_by_bill" string="Facture" context="{'group_by': 'bill_id'}"/>
+                <filter name="group_by_document" string="Document" context="{'group_by': 'document_id'}"/>
+                <filter name="group_by_user" string="Utilisateur" context="{'group_by': 'user_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_fleet_location_tracking" model="ir.actions.act_window">
+        <field name="name">Suivi comptable location</field>
+        <field name="res_model">fleet.location.tracking</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_fleet_location_tracking_search"/>
+        <field name="context">{'search_default_group_by_vehicle': 1}</field>
+    </record>
+
+    <menuitem id="menu_fleet_location_tracking"
+              name="Suivi comptable location"
+              parent="fleet.fleet_vehicles"
+              action="action_fleet_location_tracking"
+              sequence="80"/>
+
+</odoo>

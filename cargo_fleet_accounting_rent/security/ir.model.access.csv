@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_fleet_location_tracking_user,fleet.location.tracking.user,model_fleet_location_tracking,base.group_user,1,1,1,1
